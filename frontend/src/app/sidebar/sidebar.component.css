@@ -1,0 +1,11 @@
+@media (min-width: 640px) and (max-width: 768px) {
+  #separator-sidebar {
+    width: 15rem;
+  }
+}
+
+.active {
+  background-color: rgb(95, 94, 94);
+  border-radius: 6px;
+  color: white;
+}
