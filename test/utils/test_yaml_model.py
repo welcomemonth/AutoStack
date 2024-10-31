@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 import tempfile
 import yaml
-from segmapy.utils.yaml_model import YamlModel, YamlModelWithoutDefault
+from autostack.utils.yaml_model import YamlModel, YamlModelWithoutDefault
 
 class TestYamlModel(unittest.TestCase):
     def setUp(self):

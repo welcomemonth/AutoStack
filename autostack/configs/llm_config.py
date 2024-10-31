@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Optional
 from pydantic import field_validator
 
-from segmapy.utils.yaml_model import YamlModel
+from autostack.utils.yaml_model import YamlModel
 
 
 class LLMType(Enum):

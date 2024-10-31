@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Literal, Optional
 
 from pydantic import BaseModel, model_validator
-from segmapy.configs.llm_config import LLMConfig, LLMType
-from segmapy.utils.yaml_model import YamlModel
-from segmapy.const import CONFIG_ROOT
+from autostack.configs.llm_config import LLMConfig, LLMType
+from autostack.utils.yaml_model import YamlModel
+from autostack.const import CONFIG_ROOT
 
 class Config(YamlModel):
     """Configurations for BaseAPI"""

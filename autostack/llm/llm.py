@@ -1,9 +1,9 @@
 import litellm
 from typing import Optional, Union
 
-from segmapy.configs.config import config
-from segmapy.configs.llm_config import LLMConfig
-from segmapy.llm.schema import Message
+from autostack.configs.config import config
+from autostack.configs.llm_config import LLMConfig
+from autostack.llm.schema import Message
 
 class LLM:
     

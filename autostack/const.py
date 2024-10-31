@@ -3,12 +3,12 @@ from pathlib import Path
 
 from loguru import logger
 
-import segmapy
+import autostack
 
 
 def get_package_root():
     """Get the root directory of the installed package."""
-    package_root = Path(segmapy.__file__).parent.parent
+    package_root = Path(autostack.__file__).parent.parent
     for i in (".git", ".project_root", ".gitignore"):
         if (package_root / i).exists():
             break
