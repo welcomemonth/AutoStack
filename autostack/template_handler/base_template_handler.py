@@ -32,7 +32,6 @@ class BaseTemplateHandler:
 
         return Template(template_str)
 
-
     def write_file(self, file_path, content):
         """
         写入文件

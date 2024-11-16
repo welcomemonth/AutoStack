@@ -15,39 +15,40 @@ class TestNestTemplateHandler(unittest.TestCase):
     def test_create_module(self):
         entity_info = {
             "entity_name": "Student",
-            "attribution": [{
+            "description": "学生类",
+            "attributes": [{
                 "name": "id",
-                "type": "number",
+                "type": "String",
                 "required": True,
                 "comment": "用户ID"
             }, {
                 "name": "name",
-                "type": "string",
+                "type": "String",
                 "required": True,
                 "comment": "姓名"
             }, {
                 "name": "age",
-                "type": "number",
+                "type": "Int",
                 "required": True,
                 "comment": "年龄"
             }, {
                 "name": "gender",
-                "type": "string",
+                "type": "String",
                 "required": True,
                 "comment": "性别"
             }, {
                 "name": "address",
-                "type": "string",
+                "type": "String",
                 "required": True,
                 "comment": "地址"
             }, {
                 "name": "phone",
-                "type": "string",
+                "type": "String",
                 "required": True,
                 "comment": "电话号码"
             }]
         }
-        project_dir = ROOT / "autostack/workspace/demo01"
+        project_dir = ROOT / "workspace/demo01"
         template_handler = NestModuleTemplateHandle(entity_info, project_dir=project_dir)
         template_handler.create_module()
 
