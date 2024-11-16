@@ -30,5 +30,21 @@ model Department {
   description String?
 }
 
-
-
+// 学生类
+model Student {
+    id String @id @default(cuid()) //用户ID
+    name String //姓名
+    age Int //年龄
+    gender String //性别
+    address String //地址
+    phone String //电话号码
+}
+// 学生类
+model Student {
+    id String @id @default(cuid()) //用户ID
+    name String //姓名
+    age Int //年龄
+    gender String //性别
+    address String //地址
+    phone String //电话号码
+}

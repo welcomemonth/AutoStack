@@ -13,3 +13,9 @@ class FileUtil:
         """读取文件内容"""
         with open(template_file_path, 'r') as template_file:
             return template_file.read()
+
+    @staticmethod
+    def append_file(file_path, content):
+        """追加内容到文件"""
+        with open(file_path, 'a') as file:
+            file.write(content)
