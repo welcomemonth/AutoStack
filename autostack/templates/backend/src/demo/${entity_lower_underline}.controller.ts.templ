@@ -1,0 +1,34 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { ${entity_upper_camel}Service } from './${entity_lower_underline}.service';
+import { Create${entity_upper_camel}Dto } from './dto/create-${entity_lower_underline}.dto';
+import { Update${entity_upper_camel}Dto } from './dto/update-${entity_lower_underline}.dto';
+
+@Controller('${entity_lower_camel}')
+export class ${entity_upper_camel}Controller {
+  constructor(private readonly ${entity_lower_camel}Service: ${entity_upper_camel}Service) {}
+
+  @Post()
+  create(@Body() create${entity_upper_camel}Dto: Create${entity_upper_camel}Dto) {
+    return this.${entity_lower_camel}Service.create(create${entity_upper_camel}Dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.${entity_lower_camel}Service.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.${entity_lower_camel}Service.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() update${entity_upper_camel}Dto: Update${entity_upper_camel}Dto) {
+    return this.${entity_lower_camel}Service.update(id, update${entity_upper_camel}Dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.${entity_lower_camel}Service.remove(id);
+  }
+}

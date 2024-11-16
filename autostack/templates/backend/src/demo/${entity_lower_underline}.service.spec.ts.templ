@@ -1,0 +1,18 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ${entity_upper_camel}Service } from './${entity_lower_underline}.service';
+
+describe('${entity_upper_camel}Service', () => {
+  let service: ${entity_upper_camel}Service;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [${entity_upper_camel}Service],
+    }).compile();
+
+    service = module.get<${entity_upper_camel}Service>(${entity_upper_camel}Service);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
