@@ -5,5 +5,4 @@
 @Author  : Rex
 @File    : __init__.py.py
 """
-from .base_template_handler import BaseTemplateHandler
-from .nest_template_handler import NestModuleTemplateHandle
+from .nest_template_handler import NestModuleTemplateHandler, NestProjectTemplateHandler
