@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
-import { RoleLevel } from '../models/user.entity';
+import { RoleLevel } from '../model/user.entity';
 
 
 export class UpdateUserDto{
