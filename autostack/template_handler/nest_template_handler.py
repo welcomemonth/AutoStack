@@ -184,9 +184,9 @@ class NestModuleTemplateHandler:
 
 
 class NestProjectTemplateHandler:
-    def __init__(self, project_info):
+    def __init__(self, project_info, project_dir = None):
         self.project_info = project_info
-        self.project_dir = WORKSPACE_ROOT_PATH / project_info.get("project_name")
+        self.project_dir = project_dir if project_dir else WORKSPACE_ROOT_PATH / project_info.get("project_name")
         # 若项目已存在则在文件后加"_copy"
         while os.path.exists(self.project_dir):
             project_file_name = self.project_dir.name + '_copy'

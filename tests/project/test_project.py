@@ -1,5 +1,5 @@
 import pytest
-from autostack.project.project import Project, Module  # 导入你的类
+from autostack.project import Project, Module  # 导入你的类
 
 @pytest.fixture
 def project():

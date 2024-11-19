@@ -24,7 +24,7 @@ class Message(BaseModel):
     id: str = Field(default="", validate_default=True)
 
     def to_dict(self):
-        return self.model_dump()
+        return self.dict()
     
     @field_validator("id", mode="before")
     @classmethod

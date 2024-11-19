@@ -14,13 +14,13 @@ class FileUtil:
     @staticmethod
     def read_template_file(template_file_path):
         """读取文件内容"""
-        with open(template_file_path, 'r') as template_file:
+        with open(template_file_path, 'r', encoding='utf-8') as template_file:
             return template_file.read()
 
     @staticmethod
     def append_file(file_path, content):
         """追加内容到文件"""
-        with open(file_path, 'a') as file:
+        with open(file_path, 'a', encoding='utf-8') as file:
             file.write(content)
 
     @staticmethod
@@ -36,7 +36,7 @@ class FileUtil:
         # 如果目录不存在，则创建它
         if not os.path.exists(directory):
             os.makedirs(directory)
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             file.write(content)
 
     @staticmethod
@@ -47,7 +47,7 @@ class FileUtil:
         :return: 模板文件文本
         """
         template_str = None
-        with open(template_file_path, 'r') as template_file:
+        with open(template_file_path, 'r', encoding='utf-8') as template_file:
             template_str = template_file.read()
 
         return Template(template_str)

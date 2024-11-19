@@ -18,5 +18,7 @@ def get_package_root():
 
 
 ROOT = get_package_root()
-CONFIG_ROOT = ROOT / "config"
+PROMPT_ROOT = ROOT / "autostack" / "prompt"
 DEFAULT_WORKSPACE_ROOT = ROOT / "workspace"
+
+

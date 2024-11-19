@@ -1,21 +1,33 @@
+import os
 import litellm
 from typing import Optional, Union
+from dotenv import load_dotenv
+from .schema import Message
+from autostack.logs import logger
+load_dotenv("../env/llm.env")
 
-from autostack.configs.config import config
-from autostack.configs.llm_config import LLMConfig
-from autostack.llm.schema import Message
 
 class LLM:
-    
-    llmconfig: LLMConfig = config.llm
-    system_prompt = "You are a helpful assistant."
+    def __init__(self, api_key: Optional[str] = None, 
+                 base_url: Optional[str] = None, 
+                 system_prompt: Optional[str] = None,
+                 model: Optional[str] = None
+                 ):
+        
+        self.api_key = api_key or os.getenv("LLM_API_KEY")
+        self.base_url = base_url or os.getenv("LLM_BASE_URL")
+        self.system_prompt = system_prompt or os.getenv("LLM_SYSTEM_PROMPT", "You are a helpful assistant.")
+        self.model = model or os.getenv("LLM_MODEL", "gpt-4o")
 
     def completion(self, messages: Union[str, Message, list[dict], list[Message], list[str]]):
-        return litellm.completion(
-            model=self.llmconfig.model, 
+        logger.info(f"LLM completion with messages: {messages}")
+        res = litellm.completion(
+            model=self.model, 
             messages=self.format_msg(messages), 
-            api_base=self.llmconfig.base_url,
+            api_base=self.base_url,
         )
+        logger.info(f"LLM completion response: {res.choices[0].message.content}")
+        return res.choices[0].message.content
 
     def format_msg(self, messages: Union[str, Message, list[dict], list[Message], list[str]]) -> list[dict]:
         """convert messages to list[dict]."""
@@ -38,15 +50,3 @@ class LLM:
                 )
         return processed_messages
 
-
-if __name__ == "__main__":
-    llm = LLM()
-    print(llm.format_msg("hello"))
-    print(llm.format_msg(Message(content="hello")))
-    print(llm.format_msg([Message(content="hello"), Message(content="world")]))
-    print(llm.format_msg([{"role": "user", "content": "hello"}, {"role": "system", "content": "world"}]))
-    print(llm.format_msg(["hello", "world"]))
-    print(llm.format_msg([{"role": "user", "content": "hello"}, "world"]))
-    print(llm.format_msg([Message(content="hello"), "world"]))
-    print(llm.format_msg([Message(content="hello"), {"role": "system", "content": "world"}]))
-    print(llm.completion("介绍一下你自己").choices[0].message.content)

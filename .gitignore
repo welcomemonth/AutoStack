@@ -16,7 +16,7 @@ llama/
 babycoder/playground/*
 babycoder/playground_data/*
 babycoder/objective.txt
-
+learn/
 # for node
 chroma/
 node_modules/
