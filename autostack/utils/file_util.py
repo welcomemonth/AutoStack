@@ -102,3 +102,16 @@ class FileUtil:
         :return:
         """
         shutil.rmtree(dir_path)
+
+    @staticmethod
+    def generate_env(env_dict: dict, file_path):
+        """
+        用于生成环境变量xxx.env
+        :param env_dict: 环境变量字典
+        :param file_path: 文件路径
+        :return:
+        """
+        env_str = ""
+        for key, value in env_dict.items():
+            env_str += f"{key}={value}\n"
+        FileUtil.write_file(file_path, env_str)

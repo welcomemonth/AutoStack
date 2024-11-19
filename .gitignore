@@ -10,7 +10,6 @@ config.yaml
 .vscode/
 .idea/
 
-models
 llama/
 
 babycoder/playground/*
@@ -188,3 +187,4 @@ cython_debug/
 # AutoStack
 workspace/
 logs/*.txt
+!templates/backend/.env

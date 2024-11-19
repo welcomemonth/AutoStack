@@ -184,7 +184,7 @@ class NestModuleTemplateHandler:
 
 
 class NestProjectTemplateHandler:
-    def __init__(self, project_info, project_dir = None):
+    def __init__(self, project_info, project_dir=None):
         self.project_info = project_info
         self.project_dir = project_dir if project_dir else WORKSPACE_ROOT_PATH / project_info.get("project_name")
         # 若项目已存在则在文件后加"_copy"
@@ -194,6 +194,7 @@ class NestProjectTemplateHandler:
             self.project_dir = self.project_dir.parent / project_file_name
 
     def create_project(self):
+        project_name = self.project_info["project_name"]
         """
         创建项目
         """
@@ -217,9 +218,22 @@ class NestProjectTemplateHandler:
         self.add_modules_config_to_project(module_list)
 
         # 文件删除，删除模板文件
+        FileUtil.remove_file(self.project_dir / ".env")
         FileUtil.remove_dir(self.project_dir / "src/demo")
         FileUtil.remove_file(self.project_dir / "package.json.templ")
         FileUtil.remove_file(self.project_dir / "src/app.module.ts.templ")
+
+        # 生成.env文件
+        default_env = {
+            "POSTGRES_USER": "postgres",
+            "POSTGRES_PASSWORD": "postgres",
+            "POSTGRES_DB": project_name,
+            "DB_HOST": "localhost",
+            "DB_PORT": "5432",
+            "DB_SCHEMA": project_name,
+            "DATABASE_URL": "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer"
+        }
+        FileUtil.generate_env(default_env, self.project_dir / ".env")
 
     def generate_package_file(self):
         """
