@@ -9,3 +9,4 @@
 ```bash
 npx prisma migrate dev --name init
 ```
+- 执行：npm run start启动项目
