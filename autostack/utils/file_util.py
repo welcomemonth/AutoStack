@@ -8,20 +8,52 @@
 import os
 import shutil
 from string import Template
+from autostack.logs import logger
 
 
 class FileUtil:
+
     @staticmethod
-    def read_template_file(template_file_path):
-        """读取文件内容"""
-        with open(template_file_path, 'r', encoding='utf-8') as template_file:
-            return template_file.read()
+    def create_dir(dir_path):
+        """
+        如果路径不存在，则创建
+        :param dir_path: 路径地址
+        """
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
 
     @staticmethod
     def append_file(file_path, content):
-        """追加内容到文件"""
+        """
+        追加内容到文件，前提：文件路径有效
+        :param file_path: 文件路径
+        :param content: 文件内容
+        :return:
+        """
         with open(file_path, 'a', encoding='utf-8') as file:
             file.write(content)
+
+    @staticmethod
+    def remove_dir(dir_path):
+        """
+        删除目录
+        :param dir_path: 目录路径
+        :return:
+        """
+        shutil.rmtree(dir_path)
+
+    @staticmethod
+    def read_file(file_path):
+        """读取文件内容"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            logger.error(f"文件未找到: {file_path}")
+            return None
+        except IOError as e:
+            logger.error(f"读取文件时发生错误: {e}")
+            return None
 
     @staticmethod
     def write_file(file_path, content):
@@ -94,14 +126,7 @@ class FileUtil:
         """
         os.remove(file_path)
 
-    @staticmethod
-    def remove_dir(dir_path):
-        """
-        删除目录
-        :param dir_path: 目录路径
-        :return:
-        """
-        shutil.rmtree(dir_path)
+
 
     @staticmethod
     def generate_env(env_dict: dict, file_path):

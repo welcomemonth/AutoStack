@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from pathlib import Path
 from pydantic import BaseModel
 from autostack.prompt import prompt_handle
-from autostack.utils import singleton, parse_code_block, tree
+from autostack.utils import singleton, parse_code_block, tree, FileUtil
 from autostack.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.logs import logger
@@ -29,37 +29,19 @@ class Project(BaseModel):
         self.resources = self.project_home / 'resources'  # 都是处理后的json格式
         self.docs = self.project_home / 'docs'  # 原生的markdown格式
 
-        os.makedirs(self.project_home, exist_ok=True)
-        os.makedirs(self.docs, exist_ok=True)
-        os.makedirs(self.resources, exist_ok=True)
+        FileUtil.create_dir(self.project_home)
+        FileUtil.create_dir(self.docs)
+        FileUtil.create_dir(self.resources)
 
     @property
     def requirement(self):
         # 读取需求文件
-        try:
-            with open(self.requirement_path, 'r', encoding='utf-8') as f:
-                return f.read()
-        except FileNotFoundError:
-            logger.error(f"文件未找到: {self.requirement_path}")
-            return ""
-        except IOError as e:
-            logger.error(f"读取文件时发生错误: {e}")
-            return ""
+        return FileUtil.read_file(self.requirement_path)
 
     @property
     def database_design_content(self):
         """读取数据库设计文档并返回内容"""
-        if self.database_design.exists():
-            try:
-                with open(self.database_design, 'r', encoding='utf-8') as f:
-                    return f.read()
-            except Exception as e:
-                logger.error(f"读取数据库设计文档时出错: {e}")
-                return ""
-        else:
-            logger.error(f"数据库设计文档不存在: {self.database_design}")
-            return ""
-
+        return FileUtil.read_file(self.database_design)
 
     def add_module(self, module_name: str, module_description: str, status: str = 'Not Started'):
         """添加模块到项目"""
@@ -110,40 +92,33 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
             3、存储用户交互得数据，并使用prompt生成需求文档并存储到resources文件夹下
             4、然后通过project反向序列化得json，传递给项目初始化函数，进行项目初始化
     """
-    project = Project(project_name=project_name, project_description=project_desc, requirement_path=requirement_path,
+    project = Project(project_name=project_name,
+                      project_description=project_desc,
+                      requirement_path=requirement_path,
                       modules=modules)
     llm = LLM()
     project.modules = []
-    ######################### 0、存储用户的输入数据  ############################
-    user_data_floder = project.resources / "user_data"
-    os.makedirs(user_data_floder, exist_ok=True)
-    with open(user_data_floder / "user_data.json", "w", encoding='utf-8') as f:
-        f.write(f'{{"project_name": "{project_name}", "project_desc": "{project_desc}"}}')
 
-    ######################### 1、需求生成和存储 ##################################
-    prd_folder = project.docs / 'prd'
-    os.makedirs(prd_folder, exist_ok=True)
+    # 0、存储用户的输入数据
+    user_data_content = f'{{"project_name": "{project_name}", "project_desc": "{project_desc}"}}'
+    FileUtil.write_file(project.resources / "user_data" / "user_data.json", user_data_content)
 
-    genprd_prompt = prompt_handle("gen_prd.prompt", "项目名称：" + project_name + '\n' + "项目描述：" + project_desc)
-    res_prd = llm.completion(genprd_prompt)
+    # 1、需求生成和存储
+    gen_prd_prompt = prompt_handle("gen_prd.prompt", "项目名称：" + project_name + '\n' + "项目描述：" + project_desc)
+    res_prd = llm.completion(gen_prd_prompt)
     real_prd = parse_code_block(res_prd, "markdown")
 
-    with open(prd_folder / "requirement.md", "w", encoding='utf-8') as f:
-        f.write(real_prd)
-    project.requirement_path = prd_folder / "requirement.md"
+    project.requirement_path = project.resources / "prd" / "requirement.md"
+    FileUtil.write_file(project.requirement_path, real_prd)
 
-    ######################### 2、数据库设计文档生成 ##################################
-    database_folder = project.docs / 'database_design'
-    os.makedirs(database_folder, exist_ok=True)
-
+    # 2、数据库设计文档生成
     database_prompt = prompt_handle("database_design.prompt", real_prd)
     database_md = llm.completion(database_prompt)
     database = parse_code_block(database_md, "markdown")
-    with open(database_folder / "database.md", "w", encoding='utf-8') as f:
-        f.write(database)
+    project.database_design = project.resources / "database_design" / "database.md"
+    FileUtil.write_file(project.database_design, database)
 
-    project.database_design = database_folder / "database.md"
-    ######################### 3、项目初始化 ##################################
+    # 3、项目初始化
     NestProjectTemplateHandler(project.serialize, project.project_home / project.project_name).create_project()
 
     return project

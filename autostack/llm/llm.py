@@ -1,11 +1,11 @@
 import os
 import litellm
 from typing import Optional, Union
-from dotenv import load_dotenv
+import dotenv
 from .schema import Message
 from autostack.logs import logger
-load_dotenv("../env/llm.env")
-
+from autostack.const import ROOT
+dotenv.load_dotenv(ROOT / "autostack/env/llm.env")
 
 class LLM:
     def __init__(self, api_key: Optional[str] = None, 
@@ -23,7 +23,8 @@ class LLM:
         logger.info(f"LLM completion with messages: {messages}")
         res = litellm.completion(
             model=self.model, 
-            messages=self.format_msg(messages), 
+            messages=self.format_msg(messages),
+            api_key=self.api_key,
             api_base=self.base_url,
         )
         logger.info(f"LLM completion response: {res.choices[0].message.content}")

@@ -6,7 +6,7 @@ from autostack.const import DEFAULT_WORKSPACE_ROOT
 def main():
     current_project = None
     project_name = input("your project name：")
-    project_desc = input("your project descprition：")
+    project_desc = input("your project description：")
     # 判断路径是否存在
     if (DEFAULT_WORKSPACE_ROOT / project_name).exists():
         choice = input("项目已存在，加载项目 or 新建？load / new: ")
