@@ -1,1 +1,2 @@
-from .project import Project, Module, init_project
+from .project import Project, init_project, load_project
+from .module import Module

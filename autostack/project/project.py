@@ -8,45 +8,16 @@ from autostack.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.logs import logger
 from autostack.template_handler import NestModuleTemplateHandler, NestProjectTemplateHandler
+from .module import Module
 
 
-class Attribute(BaseModel):
-    """
-    {
-        "name": "id",
-        "type": "String",
-        "required": True,
-        "comment": "用户ID"
-    }
-    """
-    name: str
-    type: str
-    required: bool
-    comment: str
-
-    @property
-    def serialize(self):
-        return self.model_dump()
-
-
-# 实体类
-class Module(BaseModel):
-    entity_name: str
-    description: str
-    attributes: List[Attribute] = None
-
-    @property
-    def serialize(self):
-        # exclude={"entity_name"}采用这个可以去除一些属性
-        return self.model_dump()
-
-
-@singleton
+# @singleton
 class Project(BaseModel):
     project_name: str
     project_description: str
     author: Optional[str] = "autostack"
-    requirement_path: Optional[str] = None
+    requirement_path: Optional[Path] = None
+    database_design: Optional[Path] = None
     modules: Optional[List[Module]] = []  # 模块列表，默认为空
     project_home: Optional[Path] = None
     resources: Optional[Path] = None
@@ -61,6 +32,34 @@ class Project(BaseModel):
         os.makedirs(self.project_home, exist_ok=True)
         os.makedirs(self.docs, exist_ok=True)
         os.makedirs(self.resources, exist_ok=True)
+
+    @property
+    def requirement(self):
+        # 读取需求文件
+        try:
+            with open(self.requirement_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            logger.error(f"文件未找到: {self.requirement_path}")
+            return ""
+        except IOError as e:
+            logger.error(f"读取文件时发生错误: {e}")
+            return ""
+
+    @property
+    def database_design_content(self):
+        """读取数据库设计文档并返回内容"""
+        if self.database_design.exists():
+            try:
+                with open(self.database_design, 'r', encoding='utf-8') as f:
+                    return f.read()
+            except Exception as e:
+                logger.error(f"读取数据库设计文档时出错: {e}")
+                return ""
+        else:
+            logger.error(f"数据库设计文档不存在: {self.database_design}")
+            return ""
+
 
     def add_module(self, module_name: str, module_description: str, status: str = 'Not Started'):
         """添加模块到项目"""
@@ -81,7 +80,19 @@ class Project(BaseModel):
     @property
     def serialize(self):
         # exclude={"name"}采用这个可以去除一些属性
-        return self.model_dump(exclude={"project_home", "resources", "docs", "requirement_path", })
+        return self.model_dump(exclude={"project_home", "resources", "docs", "requirement_path"})
+
+    def save(self):
+        # 将项目序列化得数据保存到文件，每次都覆盖原文件
+        with open(self.project_home / "project.json", "w", encoding='utf-8') as f:
+            f.write(self.model_dump_json())
+
+    @staticmethod
+    def load(project_path: Path):
+        """从文件中加载项目信息"""
+        with open(project_path, "r", encoding='utf-8') as f:
+            project_data = f.read()
+        return Project.model_validate_json(project_data)
 
     @property
     def file_tree(self, file_path: Union[str, Path] = None):
@@ -91,7 +102,7 @@ class Project(BaseModel):
         return tree(file_path)
 
 
-def init_project(project_name: str, project_desc: str, requirement_path: str = None, modules: List[Module] = []):
+def init_project(project_name: str, project_desc: str, requirement_path: Path = None, modules: List[Module] = []):
     """
         项目初始化工作：
             1、在默认的工作目录下创建项目文件夹
@@ -102,6 +113,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: str = N
     project = Project(project_name=project_name, project_description=project_desc, requirement_path=requirement_path,
                       modules=modules)
     llm = LLM()
+    project.modules = []
     ######################### 0、存储用户的输入数据  ############################
     user_data_floder = project.resources / "user_data"
     os.makedirs(user_data_floder, exist_ok=True)
@@ -112,24 +124,32 @@ def init_project(project_name: str, project_desc: str, requirement_path: str = N
     prd_folder = project.docs / 'prd'
     os.makedirs(prd_folder, exist_ok=True)
 
-    genprd_prompt = prompt_handle("gen_prd.prompt", project_name + ':\n' + project_desc)
+    genprd_prompt = prompt_handle("gen_prd.prompt", "项目名称：" + project_name + '\n' + "项目描述：" + project_desc)
     res_prd = llm.completion(genprd_prompt)
     real_prd = parse_code_block(res_prd, "markdown")
 
     with open(prd_folder / "requirement.md", "w", encoding='utf-8') as f:
         f.write(real_prd)
+    project.requirement_path = prd_folder / "requirement.md"
 
-    ######################### 2、数据库表生成 ##################################
+    ######################### 2、数据库设计文档生成 ##################################
     database_folder = project.docs / 'database_design'
     os.makedirs(database_folder, exist_ok=True)
 
-    database_prompt = prompt_handle("database.prompt", real_prd)
+    database_prompt = prompt_handle("database_design.prompt", real_prd)
     database_md = llm.completion(database_prompt)
     database = parse_code_block(database_md, "markdown")
     with open(database_folder / "database.md", "w", encoding='utf-8') as f:
         f.write(database)
 
+    project.database_design = database_folder / "database.md"
     ######################### 3、项目初始化 ##################################
     NestProjectTemplateHandler(project.serialize, project.project_home / project.project_name).create_project()
 
     return project
+
+
+def load_project(project_name: str) -> Project:
+    """ 从json文件中加载已有的项目 """
+    project_path = DEFAULT_WORKSPACE_ROOT / project_name / "project.json"
+    return Project.load(project_path)
