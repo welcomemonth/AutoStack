@@ -1,4 +1,5 @@
 import re
+from string import Template
 from autostack.const import PROMPT_ROOT
 
 def prompt_handle(prompt_name, *args):
@@ -15,4 +16,3 @@ def prompt_handle(prompt_name, *args):
             prompt_template = prompt_template.replace(f'{{{var}}}', args[i])
 
     return prompt_template
-
