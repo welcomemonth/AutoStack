@@ -2,9 +2,11 @@ import os
 import litellm
 from typing import Optional, Union
 from dotenv import load_dotenv
+from autostack.const import ROOT
 from .schema import Message
 from autostack.logs import logger
-load_dotenv("../env/llm.env")
+
+load_dotenv(ROOT / "autostack" / "env" / "llm.env")
 
 
 class LLM:
@@ -14,7 +16,7 @@ class LLM:
                  model: Optional[str] = None
                  ):
         
-        self.api_key = api_key or os.getenv("LLM_API_KEY")
+        self.api_key = api_key if api_key else os.getenv("LLM_API_KEY")
         self.base_url = base_url or os.getenv("LLM_BASE_URL")
         self.system_prompt = system_prompt or os.getenv("LLM_SYSTEM_PROMPT", "You are a helpful assistant.")
         self.model = model or os.getenv("LLM_MODEL", "gpt-4o")

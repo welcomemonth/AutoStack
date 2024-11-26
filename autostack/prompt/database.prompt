@@ -10,7 +10,12 @@
 ```
 {database_design}
 ```
+### 已有的prisma内容
+```
+{prisma_schema}
+```
 
 ## 要求:
 1. 根据需求文档和数据库设计文档生成prisma实体类.
 2. 只输出prisma实体类,不要输出其他任何内容.
+3. 不要修改已有的prisma内容.
