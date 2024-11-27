@@ -1,9 +1,14 @@
-from autostack.prompt.prompt_handle import prompt_handle
-from autostack.const import PROMPT_ROOT
+from autostack.utils import PromptUtil
+from autostack.common.const import PROMPT_ROOT
+import unittest
 
-template_path = PROMPT_ROOT / 'gen_req.prompt'
-replacements = {
-    'project_name': 'AI Project'
-}
-product_requirements = prompt_handle(template_path, replacements)
-print(product_requirements)
+
+class TestPromptHandler(unittest.TestCase):
+
+    def test_prompt_handle(self):
+        template_path = PROMPT_ROOT / 'gen_prd.prompt'
+        replacements = {
+            'project_name': 'AI Project'
+        }
+        product_requirements = PromptUtil.prompt_handle(template_path, replacements)
+        print(product_requirements)

@@ -1,9 +1,7 @@
 from autostack.llm import LLM
-from autostack.logs import logger
 from autostack.project import init_project, load_project
-from autostack.const import DEFAULT_WORKSPACE_ROOT
-from autostack.prompt import prompt_handle
-from autostack.utils import MarkdownUtil, FileUtil
+from autostack.common.const import DEFAULT_WORKSPACE_ROOT
+from autostack.utils import MarkdownUtil, FileUtil, PromptUtil
 
 
 def main():
@@ -30,13 +28,13 @@ def main():
     current_project.save()
 
     # 1、根据项目需求文档和数据库设计文档来生成 创建模块所需要的内容：
-    database_prompt = prompt_handle("database.prompt",
-                                    current_project.requirement_doc,
-                                    current_project.database_design_doc,
-                                    current_project.prisma_schema)
+    database_prompt = PromptUtil.prompt_handle("database.prompt",
+                                               current_project.requirement_doc,
+                                               current_project.database_design_doc,
+                                               current_project.prisma_schema)
     database_res = llm.completion(database_prompt)
     database = MarkdownUtil.parse_code_block(database_res, "prisma")
-    FileUtil.append_file(current_project.project_home/"prisma"/"schema.prisma", database)
+    FileUtil.append_file(current_project.project_home / "prisma" / "schema.prisma", database)
     # 2、分析需求文档，生成接口描述，项目中的模块文件描述。
 
     # 3、对于某个复杂业务接口，让AI根据项目中已有的模块中的服务文件来选择该业务需要哪些服务，携带者已有的服务文件，生成该业务接口的代码

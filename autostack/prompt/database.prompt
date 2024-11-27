@@ -3,16 +3,16 @@
 
 ### 需求文档：
 ```
-{requirement_doc}
+${requirement_doc}
 ```
 
 ### 数据库设计文档
 ```
-{database_design_doc}
+${database_design_doc}
 ```
 ### 已有的prisma内容
 ```
-{prisma_schema}
+${prisma_schema}
 ```
 
 ## 要求:

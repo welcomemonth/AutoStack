@@ -6,7 +6,7 @@
 
 ### 文档内容:
 ```
-{prd_content}
+${prd_content}
 ```
 
 ### 返回格式：

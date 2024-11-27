@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from autostack.llm import LLM
 from autostack.llm.schema import Message
 
+
 class TestLLM(unittest.TestCase):
 
     @patch('llm.os.getenv')
@@ -21,7 +22,8 @@ class TestLLM(unittest.TestCase):
         self.assertEqual(llm.model, "env_model")
 
     def test_init_with_parameters(self):
-        llm = LLM(api_key="param_api_key", base_url="param_base_url", system_prompt="param_system_prompt", model="param_model")
+        llm = LLM(api_key="param_api_key", base_url="param_base_url", system_prompt="param_system_prompt",
+                  model="param_model")
         self.assertEqual(llm.api_key, "param_api_key")
         self.assertEqual(llm.base_url, "param_base_url")
         self.assertEqual(llm.system_prompt, "param_system_prompt")
@@ -30,7 +32,8 @@ class TestLLM(unittest.TestCase):
     @patch('llm.litellm.completion')
     def test_completion(self, mock_completion):
         mock_completion.return_value = "mocked_response"
-        llm = LLM(api_key="test_api_key", base_url="test_base_url", system_prompt="test_system_prompt", model="test_model")
+        llm = LLM(api_key="test_api_key", base_url="test_base_url", system_prompt="test_system_prompt",
+                  model="test_model")
         messages = ["Hello, world!"]
         response = llm.completion(messages)
         self.assertEqual(response, "mocked_response")
@@ -51,6 +54,7 @@ class TestLLM(unittest.TestCase):
             {"role": "user", "content": "Hey!"}
         ]
         self.assertEqual(formatted_messages, expected_messages)
+
 
 if __name__ == "__main__":
     unittest.main()

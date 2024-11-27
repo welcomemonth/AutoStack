@@ -8,8 +8,8 @@
 
 from string import Template
 from autostack.utils import NameRuleConverter, FileUtil
-from autostack.const import ROOT
-from autostack.logs import logger
+from autostack.common.const import ROOT
+from autostack.common.logs import logger
 import os
 
 BACKEND_TEMPLATE_DIR_PATH = ROOT / 'templates/backend/'

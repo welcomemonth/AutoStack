@@ -7,7 +7,7 @@
 """
 import unittest
 from autostack.template_handler import NestModuleTemplateHandler, NestProjectTemplateHandler
-from autostack.const import ROOT
+from autostack.common.const import ROOT
 
 
 class TestNestTemplateHandler(unittest.TestCase):

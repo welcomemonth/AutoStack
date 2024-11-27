@@ -8,7 +8,7 @@
 import os
 import shutil
 from string import Template
-from autostack.logs import logger
+from autostack.common.logs import logger
 
 
 class FileUtil:

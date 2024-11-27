@@ -11,7 +11,7 @@ from typing import NamedTuple
 
 from pydantic import BaseModel
 
-from autostack.logs import logger
+from autostack.common.logs import logger
 from autostack.llm.token_counter import FIREWORKS_GRADE_TOKEN_COSTS, TOKEN_COSTS
 
 

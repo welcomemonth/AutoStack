@@ -7,7 +7,7 @@
 
 ### 项目名称: 
 ```
-{project_name}
+${project_name}
 ```
 
 ### 返回格式：

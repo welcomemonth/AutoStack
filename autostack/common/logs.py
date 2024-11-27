@@ -12,7 +12,7 @@ from functools import partial
 
 from loguru import logger as _logger
 
-from autostack.const import ROOT
+from autostack.common.const import ROOT
 
 '''
 print_level：控制台输出的日志级别，默认为 INFO。

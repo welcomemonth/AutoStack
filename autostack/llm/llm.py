@@ -2,9 +2,9 @@ import os
 import litellm
 from typing import Optional, Union
 from dotenv import load_dotenv
-from autostack.const import ROOT
+from autostack.common.const import ROOT
 from .schema import Message
-from autostack.logs import logger
+from autostack.common.logs import logger
 
 load_dotenv(ROOT / "autostack" / "env" / "llm.env")
 

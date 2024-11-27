@@ -1,5 +1,5 @@
 import re
-from autostack.logs import logger
+from autostack.common.logs import logger
 
 
 class MarkdownUtil:

@@ -1,14 +1,11 @@
-import os
 from typing import List, Optional, Union
 from pathlib import Path
 from pydantic import BaseModel
-from autostack.prompt import prompt_handle
-from autostack.common.wrapper import singleton
-from autostack.utils import MarkdownUtil, tree, FileUtil
-from autostack.const import DEFAULT_WORKSPACE_ROOT
+from autostack.utils import MarkdownUtil, FileTreeUtil, FileUtil, PromptUtil
+from autostack.common.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
-from autostack.logs import logger
-from autostack.template_handler import NestModuleTemplateHandler, NestProjectTemplateHandler
+from autostack.common.logs import logger
+from autostack.template_handler import NestProjectTemplateHandler
 from .module import Module
 
 
@@ -54,17 +51,17 @@ class Project(BaseModel):
         """添加模块到项目"""
         module = Module(module_name=module_name, module_description=module_description, status=status)
         self.modules.append(module)
-        print(f"Module '{module_name}' added to project.")
+        logger.info(f"Module '{module_name}' added to project.")
 
     def update_module_status(self, module_name: str, status: str):
         """更新指定模块的状态"""
         for module in self.modules:
             if module.module_name == module_name:
                 module.status = status
-                print(f"Module '{module_name}' status updated to '{status}'.")
+                logger.info(f"Module '{module_name}' status updated to '{status}'.")
                 break
         else:
-            print(f"Module '{module_name}' not found in project.")
+            logger.error(f"Module '{module_name}' not found in project.")
 
     @property
     def serialize(self):
@@ -88,7 +85,7 @@ class Project(BaseModel):
         """返回项目的文件树"""
         if file_path is None:
             file_path = self.root
-        return tree(file_path)
+        return FileTreeUtil.tree(file_path)
 
 
 def init_project(project_name: str, project_desc: str, requirement_path: Path = None, modules: List[Module] = []):
@@ -111,7 +108,10 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.resources / "user_data" / "user_data.json", user_data_content)
 
     # 1、需求生成和存储
-    gen_prd_prompt = prompt_handle("gen_prd.prompt", "项目名称：" + project_name + '\n' + "项目描述：" + project_desc)
+    gen_prd_info = {
+        "project_name":  "项目名称：" + project_name + '\n' + "项目描述：" + project_desc
+    }
+    gen_prd_prompt = PromptUtil.prompt_handle("gen_prd.prompt", gen_prd_info)
     res_prd = llm.completion(gen_prd_prompt)
     real_prd = MarkdownUtil.parse_code_block(res_prd, "markdown")
 
@@ -119,7 +119,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.requirement_path, real_prd)
 
     # 2、数据库设计文档生成
-    database_prompt = prompt_handle("database_design.prompt", real_prd)
+    database_prompt = PromptUtil.prompt_handle("database_design.prompt", real_prd)
     database_md = llm.completion(database_prompt)
     database = MarkdownUtil.parse_code_block(database_md, "markdown")
     project.database_design_path = project.docs / "database_design" / "database.md"

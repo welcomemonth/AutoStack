@@ -3,14 +3,14 @@
 
 ### schema.prisma
 ```
-{schema_prisma}
+${schema_prisma}
 ```
 
 ### 要求
 1. 根据schema.prisma内容，生成每个model实体的json schema。
 2. 返回的json格式如下：
 ```
-{schema_json}
+${schema_json}
 ```
 3. 只返回该模块的相关json，不要包含其他任何内容。
 
