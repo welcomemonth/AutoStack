@@ -116,14 +116,14 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     real_prd = MarkdownUtil.parse_code_block(res_prd, "markdown")
 
     project.requirement_path = project.docs / "prd" / "requirement.md"
-    FileUtil.write_file(project.requirement_path, real_prd)
+    FileUtil.write_file(project.requirement_path, real_prd[0])
 
     # 2、数据库设计文档生成
     database_prompt = prompt_handle("database_design.prompt", real_prd)
-    database_md = llm.completion(database_prompt)
-    database = MarkdownUtil.parse_code_block(database_md, "markdown")
+    database_design_doc = llm.completion(database_prompt)
+    database_design = MarkdownUtil.parse_code_block(database_design_doc, "markdown")
     project.database_design_path = project.docs / "database_design" / "database.md"
-    FileUtil.write_file(project.database_design_path, database)
+    FileUtil.write_file(project.database_design_path, database_design[0])
 
     # 3、项目初始化
     NestProjectTemplateHandler(project.serialize, project.project_home).create_project()
