@@ -30,17 +30,21 @@ def main():
     current_project.save()
 
     # 1、根据项目需求文档和数据库设计文档来生成 创建模块所需要的内容：
-    database_prompt = PromptUtil.prompt_handle("database.prompt",
-                                               current_project.requirement_doc,
-                                               current_project.database_design_doc,
-                                               current_project.prisma_schema)
+    database_info = {
+        "requirement_doc": current_project.requirement_doc,
+        "database_design_doc": current_project.database_design_doc,
+        "prisma_schema": current_project.prisma_schema
+    }
+    database_prompt = PromptUtil.prompt_handle("database.prompt", database_info)
     database_res = llm.completion(database_prompt)
     prisma_database = MarkdownUtil.parse_code_block(database_res, "prisma")
     FileUtil.append_file(current_project.project_home / "prisma" / "schema.prisma", prisma_database[0])
     # 2、分析需求文档，生成接口描述，项目中的模块文件描述。
-    gen_entity_prompt = PromptUtil.prompt_handle("gen_entity.prompt",
-                                      prisma_database[0],
-                                      Module.get_schema())
+    gen_entity_info = {
+        "schema_prisma": prisma_database[0],
+        "schema_json": Module.get_schema(),
+    }
+    gen_entity_prompt = PromptUtil.prompt_handle("gen_entity.prompt", gen_entity_info)
     entity_res = llm.completion(gen_entity_prompt)
     entity_list = MarkdownUtil.parse_code_block(entity_res, "json")
     for entity in entity_list:
@@ -48,6 +52,7 @@ def main():
                         description=entity["description"],
                         attributes=entity["attributes"])
         current_project.add_module(module)
+    print(entity_list)
     # 3、对于某个复杂业务接口，让AI根据项目中已有的模块中的服务文件来选择该业务需要哪些服务，携带者已有的服务文件，生成该业务接口的代码
 
     # 4、对于业务接口代码进行测试，解决该接口的运行成功出现的bug

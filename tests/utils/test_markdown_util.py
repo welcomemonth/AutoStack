@@ -16,7 +16,8 @@ class TestMarkdownUtil(unittest.TestCase):
 
         And some text after the code block.
         """
-        expected_output = ['def hello_world():\n    print("Hello, world!")']
+        expected_output = ["""def hello_world():
+            print("Hello, world!")"""]
         actual_output = MarkdownUtil.parse_code_block(content, 'python')
         self.assertEqual(actual_output, expected_output)
 

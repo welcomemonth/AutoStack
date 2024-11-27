@@ -109,7 +109,8 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
 
     # 1、需求生成和存储
     gen_prd_info = {
-        "project_name":  "项目名称：" + project_name + '\n' + "项目描述：" + project_desc
+        "project_name": project_name,
+        "project_desc": project_desc
     }
     gen_prd_prompt = PromptUtil.prompt_handle("gen_prd.prompt", gen_prd_info)
     res_prd = llm.completion(gen_prd_prompt)
@@ -119,7 +120,10 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.requirement_path, real_prd[0])
 
     # 2、数据库设计文档生成
-    database_prompt = prompt_handle("database_design.prompt", real_prd[0])
+    database_design_info = {
+        "prd_content": real_prd[0]
+    }
+    database_prompt = PromptUtil.prompt_handle("database_design.prompt", database_design_info)
     database_design_doc = llm.completion(database_prompt)
     database_design = MarkdownUtil.parse_code_block(database_design_doc, "markdown")
     project.database_design_path = project.docs / "database_design" / "database.md"

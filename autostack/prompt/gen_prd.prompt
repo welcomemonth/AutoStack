@@ -9,6 +9,8 @@
 ```
 ${project_name}
 ```
+### 项目描述
+${project_desc}
 
 ### 返回格式：
 1、要求以markdown格式返回产品需求文档。

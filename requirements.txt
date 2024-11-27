@@ -1,8 +1,6 @@
-argparse==1.4.0
-openai==1.41.0
-chromadb==0.5.3
-pre-commit>=3.2.0
-python-dotenv==1.0.0
+gitignore_parser==0.1.9
+litellm==1.52.16
+loguru==0.7.2
+pydantic==2.10.2
+python-dotenv==1.0.1
 tiktoken==0.7.0
-gitignore-parser==0.1.9
-pydantic==2.9.0
