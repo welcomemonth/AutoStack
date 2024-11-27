@@ -23,6 +23,22 @@ class FileUtil:
             os.makedirs(dir_path)
 
     @staticmethod
+    def write_file(file_path, content):
+        """
+        写入文件
+        :param file_path: 文件路径
+        :param content: 文件内容
+        :return:
+        """
+        # 获取文件路径中的目录部分
+        directory = os.path.dirname(file_path)
+        # 如果目录不存在，则创建它
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(content)
+
+    @staticmethod
     def append_file(file_path, content):
         """
         追加内容到文件，前提：文件路径有效
@@ -38,13 +54,25 @@ class FileUtil:
         """
         删除目录
         :param dir_path: 目录路径
-        :return:
         """
         shutil.rmtree(dir_path)
 
     @staticmethod
+    def remove_file(file_path):
+        """
+        删除文件
+        :param file_path: 文件路径
+        :return:
+        """
+        os.remove(file_path)
+
+    @staticmethod
     def read_file(file_path):
-        """读取文件内容"""
+        """
+        读取文件内容
+        :param file_path: 文件路径
+        :return: 文件内容
+        """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
@@ -54,22 +82,6 @@ class FileUtil:
         except IOError as e:
             logger.error(f"读取文件时发生错误: {e}")
             return None
-
-    @staticmethod
-    def write_file(file_path, content):
-        """
-        写入文件
-        :param file_path: 文件路径
-        :param content: 文件内容
-        :return:
-        """
-        # 获取文件路径中的目录部分
-        directory = os.path.dirname(file_path)
-        # 如果目录不存在，则创建它
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(content)
 
     @staticmethod
     def get_template(template_file_path):
@@ -116,17 +128,6 @@ class FileUtil:
             print(f"所有文件已成功复制到 '{dest_dir}'。")
         except Exception as e:
             print(f"复制文件时出错: {e}")
-
-    @staticmethod
-    def remove_file(file_path):
-        """
-        删除文件
-        :param file_path: 文件路径
-        :return:
-        """
-        os.remove(file_path)
-
-
 
     @staticmethod
     def generate_env(env_dict: dict, file_path):
