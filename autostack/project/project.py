@@ -119,7 +119,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.requirement_path, real_prd[0])
 
     # 2、数据库设计文档生成
-    database_prompt = prompt_handle("database_design.prompt", real_prd)
+    database_prompt = prompt_handle("database_design.prompt", real_prd[0])
     database_design_doc = llm.completion(database_prompt)
     database_design = MarkdownUtil.parse_code_block(database_design_doc, "markdown")
     project.database_design_path = project.docs / "database_design" / "database.md"

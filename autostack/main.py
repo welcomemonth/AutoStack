@@ -1,6 +1,6 @@
 from autostack.llm import LLM
 from autostack.logs import logger
-from autostack.project import init_project, load_project
+from autostack.project import init_project, load_project, Module
 from autostack.const import DEFAULT_WORKSPACE_ROOT
 from autostack.prompt import prompt_handle
 from autostack.utils import MarkdownUtil, FileUtil
@@ -35,10 +35,19 @@ def main():
                                     current_project.database_design_doc,
                                     current_project.prisma_schema)
     database_res = llm.completion(database_prompt)
-    database = MarkdownUtil.parse_code_block(database_res, "prisma")
-    FileUtil.append_file(current_project.project_home / "prisma" / "schema.prisma", database[0])
+    prisma_database = MarkdownUtil.parse_code_block(database_res, "prisma")
+    FileUtil.append_file(current_project.project_home / "prisma" / "schema.prisma", prisma_database[0])
     # 2、分析需求文档，生成接口描述，项目中的模块文件描述。
-
+    gen_entity_prompt = prompt_handle("gen_entity.prompt",
+                                      prisma_database[0],
+                                      Module.get_schema())
+    entity_res = llm.completion(gen_entity_prompt)
+    entity_list = MarkdownUtil.parse_code_block(entity_res, "json")
+    for entity in entity_list:
+        module = Module(entity_name=entity["entity_name"],
+                        description=entity["description"],
+                        attributes=entity["attributes"])
+        current_project.add_module(module)
     # 3、对于某个复杂业务接口，让AI根据项目中已有的模块中的服务文件来选择该业务需要哪些服务，携带者已有的服务文件，生成该业务接口的代码
 
     # 4、对于业务接口代码进行测试，解决该接口的运行成功出现的bug
