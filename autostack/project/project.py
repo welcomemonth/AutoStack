@@ -17,31 +17,37 @@ class Project(BaseModel):
     project_description: str
     author: Optional[str] = "autostack"
     requirement_path: Optional[Path] = None
-    database_design: Optional[Path] = None
+    database_design_path: Optional[Path] = None
     modules: Optional[List[Module]] = []  # 模块列表，默认为空
+    root: Optional[Path] = None
     project_home: Optional[Path] = None
     resources: Optional[Path] = None
     docs: Optional[Path] = None
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.project_home = DEFAULT_WORKSPACE_ROOT / self.project_name
-        self.resources = self.project_home / 'resources'  # 都是处理后的json格式
-        self.docs = self.project_home / 'docs'  # 原生的markdown格式
+        self.root = DEFAULT_WORKSPACE_ROOT / self.project_name
+        self.project_home = self.root / self.project_name
+        self.resources = self.root / 'resources'  # 都是处理后的json格式
+        self.docs = self.root / 'docs'  # 原生的markdown格式
 
-        FileUtil.create_dir(self.project_home)
+        FileUtil.create_dir(self.root)
         FileUtil.create_dir(self.docs)
         FileUtil.create_dir(self.resources)
 
     @property
-    def requirement(self):
+    def requirement_doc(self):
         # 读取需求文件
         return FileUtil.read_file(self.requirement_path)
 
     @property
-    def database_design_content(self):
+    def database_design_doc(self):
         """读取数据库设计文档并返回内容"""
-        return FileUtil.read_file(self.database_design)
+        return FileUtil.read_file(self.database_design_path)
+
+    @property
+    def prisma_schema(self):
+        return FileUtil.read_file(self.project_home / "prisma" / "schema.prisma")
 
     def add_module(self, module_name: str, module_description: str, status: str = 'Not Started'):
         """添加模块到项目"""
@@ -66,7 +72,7 @@ class Project(BaseModel):
 
     def save(self):
         # 将项目序列化得数据保存到文件，每次都覆盖原文件
-        with open(self.project_home / "project.json", "w", encoding='utf-8') as f:
+        with open(self.root / "project.json", "w", encoding='utf-8') as f:
             f.write(self.model_dump_json())
 
     @staticmethod
@@ -80,7 +86,7 @@ class Project(BaseModel):
     def file_tree(self, file_path: Union[str, Path] = None):
         """返回项目的文件树"""
         if file_path is None:
-            file_path = self.project_home
+            file_path = self.root
         return tree(file_path)
 
 
@@ -108,18 +114,18 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     res_prd = llm.completion(gen_prd_prompt)
     real_prd = parse_code_block(res_prd, "markdown")
 
-    project.requirement_path = project.resources / "prd" / "requirement.md"
+    project.requirement_path = project.docs / "prd" / "requirement.md"
     FileUtil.write_file(project.requirement_path, real_prd)
 
     # 2、数据库设计文档生成
     database_prompt = prompt_handle("database_design.prompt", real_prd)
     database_md = llm.completion(database_prompt)
     database = parse_code_block(database_md, "markdown")
-    project.database_design = project.resources / "database_design" / "database.md"
-    FileUtil.write_file(project.database_design, database)
+    project.database_design_path = project.docs / "database_design" / "database.md"
+    FileUtil.write_file(project.database_design_path, database)
 
     # 3、项目初始化
-    NestProjectTemplateHandler(project.serialize, project.project_home / project.project_name).create_project()
+    NestProjectTemplateHandler(project.serialize, project.project_home).create_project()
 
     return project
 

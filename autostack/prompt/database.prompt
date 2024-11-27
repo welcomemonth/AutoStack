@@ -3,12 +3,12 @@
 
 ### 需求文档：
 ```
-{requirement}
+{requirement_doc}
 ```
 
 ### 数据库设计文档
 ```
-{database_design}
+{database_design_doc}
 ```
 ### 已有的prisma内容
 ```

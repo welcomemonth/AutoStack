@@ -22,13 +22,3 @@ model User {
   password String
   role     RoleLevel? @default(USER) // 默认角色设置为 GUEST
 }
-
-
-model Department {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-}
-
-
-

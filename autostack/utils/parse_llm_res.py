@@ -1,6 +1,7 @@
 import re
 from autostack.logs import logger
 
+
 def parse_code_block(content: str, language: str) -> str:
     """
     解析 ```xxx {content} ``` 中的具体内容，仅解析最外层，支持解析失败的情况。

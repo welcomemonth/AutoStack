@@ -2,6 +2,7 @@ import re
 from string import Template
 from autostack.const import PROMPT_ROOT
 
+
 def prompt_handle(prompt_name, *args):
     # 读取 prompt 文件内容
     with open(PROMPT_ROOT / prompt_name, 'r', encoding='utf-8') as file:
