@@ -48,7 +48,7 @@ class TestNestTemplateHandler(unittest.TestCase):
                 "comment": "电话号码"
             }]
         }
-        project_dir = ROOT / "workspace/demo01"
+        project_dir = ROOT / "workspace / demo01"
         template_handler = NestModuleTemplateHandler(entity_info, project_dir=project_dir)
         template_handler.create_module()
 

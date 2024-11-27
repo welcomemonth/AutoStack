@@ -1,0 +1,30 @@
+## 任务
+根据给你的schema.prisma文件内容，对于model实体的每个字段，生成一个对应的json schema。
+
+### schema.prisma
+```
+{schema_prisma}
+```
+
+### 要求
+1. 根据schema.prisma内容，生成每个model实体的json schema。
+2. 返回的json格式如下：
+```
+{schema_json}
+```
+3. 只返回该模块的相关json，不要包含其他任何内容。
+
+### 例子
+```json
+"entity_name": "Student",
+"description": "学生类",
+"attributes": [{
+    "name": "id",
+    "type": "String",
+    "required": True,
+    "comment": "用户ID"
+},
+...
+]
+```
+

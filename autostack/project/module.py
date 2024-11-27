@@ -42,8 +42,16 @@ class Module(BaseModel):
         # exclude={"entity_name"}采用这个可以去除一些属性
         return self.model_dump()
 
+    @staticmethod
+    def get_schema():
+        return {
+            "entity_name": "模块名称",
+            "description": "模块描述",
+            "attributes": [Attribute.get_schema()]
+        }
+
 
 if __name__ == "__main__":
-    print(Attribute.get_schema())
+    print(Module.get_schema())
 
 

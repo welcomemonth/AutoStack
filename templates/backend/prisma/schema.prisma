@@ -17,7 +17,7 @@ enum RoleLevel {
 }
 
 model User {
-  id        String    @id @default(cuid())
+  id       String    @id @default(cuid())
   username String     @unique
   password String
   role     RoleLevel? @default(USER) // 默认角色设置为 GUEST
