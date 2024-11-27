@@ -3,7 +3,8 @@ from typing import List, Optional, Union
 from pathlib import Path
 from pydantic import BaseModel
 from autostack.prompt import prompt_handle
-from autostack.utils import singleton, parse_code_block, tree, FileUtil
+from autostack.common.wrapper import singleton
+from autostack.utils import MarkdownUtil, tree, FileUtil
 from autostack.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.logs import logger
@@ -112,7 +113,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     # 1、需求生成和存储
     gen_prd_prompt = prompt_handle("gen_prd.prompt", "项目名称：" + project_name + '\n' + "项目描述：" + project_desc)
     res_prd = llm.completion(gen_prd_prompt)
-    real_prd = parse_code_block(res_prd, "markdown")
+    real_prd = MarkdownUtil.parse_code_block(res_prd, "markdown")
 
     project.requirement_path = project.docs / "prd" / "requirement.md"
     FileUtil.write_file(project.requirement_path, real_prd)
@@ -120,7 +121,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     # 2、数据库设计文档生成
     database_prompt = prompt_handle("database_design.prompt", real_prd)
     database_md = llm.completion(database_prompt)
-    database = parse_code_block(database_md, "markdown")
+    database = MarkdownUtil.parse_code_block(database_md, "markdown")
     project.database_design_path = project.docs / "database_design" / "database.md"
     FileUtil.write_file(project.database_design_path, database)
 
