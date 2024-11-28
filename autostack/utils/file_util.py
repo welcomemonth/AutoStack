@@ -72,6 +72,16 @@ class FileUtil:
         os.remove(file_path)
 
     @staticmethod
+    def clear_file(file_path):
+        """
+        清空文件内容
+        :param file_path: 文件地址
+        """
+        with open(file_path, 'w') as f:
+            f.truncate()
+            logger.info(f"文件 {file_path} 清空完成")
+
+    @staticmethod
     def read_file(file_path):
         """
         读取文件内容
