@@ -8,14 +8,14 @@
 """
 
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Union
 from gitignore_parser import parse_gitignore
 
 
 class FileTreeUtil:
 
     @staticmethod
-    def tree(root: str | Path, gitignore: str | Path = None) -> str:
+    def tree(root: Union[str, Path], gitignore: Union[str, Path] = None) -> str:
         """
         递归遍历目录结构并以树状格式输出。
         Example

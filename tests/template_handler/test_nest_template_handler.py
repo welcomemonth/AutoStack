@@ -13,8 +13,8 @@ from autostack.common.const import ROOT
 class TestNestTemplateHandler(unittest.TestCase):
 
     def test_create_module(self):
-        entity_info = {
-            "entity_name": "Student",
+        module_info = {
+            "name": "Student",
             "description": "学生类",
             "attributes": [{
                 "name": "id",
@@ -49,7 +49,7 @@ class TestNestTemplateHandler(unittest.TestCase):
             }]
         }
         project_dir = ROOT / "workspace / demo01"
-        template_handler = NestModuleTemplateHandler(entity_info, project_dir=project_dir)
+        template_handler = NestModuleTemplateHandler(module_info, project_dir=project_dir)
         template_handler.create_module()
 
     def test_nest_project_template_handler(self):

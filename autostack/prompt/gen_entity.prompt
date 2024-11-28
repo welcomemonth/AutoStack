@@ -13,18 +13,17 @@ ${schema_prisma}
 ${schema_json}
 ```
 3. 只返回该模块的相关json，不要包含其他任何内容。
+4. 每个实体内容是一个单独的json。
 
 ### 例子
 ```json
-"entity_name": "Student",
+{
+"name": "Student",
 "description": "学生类",
 "attributes": [{
     "name": "id",
     "type": "String",
     "required": True,
     "comment": "用户ID"
-},
-...
-]
+}]}
 ```
-

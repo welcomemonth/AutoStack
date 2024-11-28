@@ -1,11 +1,11 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 from pathlib import Path
 from pydantic import BaseModel
 from autostack.utils import MarkdownUtil, FileTreeUtil, FileUtil, PromptUtil
 from autostack.common.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.common.logs import logger
-from autostack.template_handler import NestProjectTemplateHandler
+from autostack.template_handler import NestProjectTemplateHandler, NestModuleTemplateHandler
 from .module import Module
 
 
@@ -47,16 +47,22 @@ class Project(BaseModel):
     def prisma_schema(self):
         return FileUtil.read_file(self.project_home / "prisma" / "schema.prisma")
 
-    def add_module(self, module_name: str, module_description: str, status: str = 'Not Started'):
+    def add_module(self, module: Module):
         """添加模块到项目"""
-        module = Module(module_name=module_name, module_description=module_description, status=status)
+        # project_info = {
+        #     "project_name": self.project_name,
+        #     "project_description": self.project_description,
+        #     "author": self.author,
+        #     "modules": []
+        # }
+        # module_list = [module.serialize]
+        module.created = True
         self.modules.append(module)
-        logger.info(f"Module '{module_name}' added to project.")
 
     def update_module_status(self, module_name: str, status: str):
         """更新指定模块的状态"""
         for module in self.modules:
-            if module.module_name == module_name:
+            if module.name == module_name:
                 module.status = status
                 logger.info(f"Module '{module_name}' status updated to '{status}'.")
                 break
@@ -126,12 +132,10 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     database_prompt = PromptUtil.prompt_handle("database_design.prompt", database_design_info)
     database_design_doc = llm.completion(database_prompt)
     database_design = MarkdownUtil.parse_code_block(database_design_doc, "markdown")
-    project.database_design_path = project.docs / "database_design" / "database.md"
+    project.database_design_path = project.docs / "database_design" / "database_design.md"
     FileUtil.write_file(project.database_design_path, database_design[0])
 
     # 3、项目初始化
-    NestProjectTemplateHandler(project.serialize, project.project_home).create_project()
-
     return project
 
 

@@ -85,16 +85,16 @@ class NestModuleTemplateHandler:
     Nest模块模板处理器
     """
 
-    def __init__(self, entity_info, project_dir):
+    def __init__(self, module_info, project_dir):
         """
         初始化项目模块处理器
-        :param entity_info: 模块实体信息
+        :param module_info: 模块信息
         :param project_dir: 项目路径
         """
-        self.entity_info = entity_info
+        self.module_info = module_info
         self.project_dir = project_dir
         # 初始化模块目录
-        module_name = NameRuleConverter.to_underline(self.entity_info['entity_name'])
+        module_name = NameRuleConverter.to_underline(self.module_info['name'])
         module_dir = self.project_dir / "src" / module_name
         self.module_dir = module_dir
         logger.info("module_dir", str(module_dir))
@@ -108,12 +108,12 @@ class NestModuleTemplateHandler:
         创建模块
         """
         # 将实体信息导入prisma
-        self.generate_prisma_model(self.entity_info)
-        entity_name = self.entity_info.get("entity_name")
-        attributions = self.entity_info.get("attributes", [])
+        self.generate_prisma_model(self.module_info)
+        entity_name = self.module_info.get("name")
+        attributions = self.module_info.get("attributes", [])
         info = {
             "entity_lower_camel": NameRuleConverter.to_lower_camel_case(entity_name),
-            "entity_upper_camel": NameRuleConverter.to_upper_camel_case(entity_name),
+            "entity_upper_camel": entity_name,
             "entity_lower_underline": NameRuleConverter.to_underline(entity_name),
             "entity_attribute": generate_nest_attributions(attributions, validate=False),
             "create_entity_dto_attribute": generate_nest_attributions(attributions),
@@ -156,7 +156,7 @@ class NestModuleTemplateHandler:
         创建sql
         :param entity_info: 实体信息
         """
-        entity_name = entity_info.get("entity_name")
+        entity_name = entity_info.get("name")
         description = entity_info.get("description")
         prisma_model_text = f"\n// {description}\n"
         prisma_model_text += f"model {entity_name} {{\n"
@@ -268,10 +268,10 @@ class NestProjectTemplateHandler:
         import_module_list = []
         module_name_list = []
         for module in module_list:
-            module_name = module.get("entity_name")
+            module_name = module.get("name")
             module_name_underline = NameRuleConverter.to_underline(module_name)
-            module_name_upper = NameRuleConverter.to_upper_camel_case(module_name)
-            import_module_content = f"import {{ {module_name_upper}Module }} from './{module_name_underline}/{module_name_underline}.module';"
+            # module_name_upper = NameRuleConverter.to_upper_camel_case(module_name)
+            import_module_content = f"import {{ {module_name}Module }} from './{module_name_underline}/{module_name_underline}.module';"
             import_module_list.append(import_module_content)
             module_name_list.append(f"{module_name}Module")
         modules_info = {
