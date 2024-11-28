@@ -57,6 +57,10 @@ def generate_nest_attributions(attributions, validate=True):
         attribute_type = attribute.get("type")
         attribute_required = attribute.get("required")
         attribute_comment = attribute.get("comment")
+        # 如果attribute_type不在PRISMA_TO_TS中，则continue
+        if attribute_type not in PRISMA_TO_TS.keys():
+            # TODO 复杂类型处理
+            continue
         ts_attribute_type = PRISMA_TO_TS.get(attribute_type)
         attribution_context += f"\n    /**\n     * {attribute_comment}\n     */\n"
         if validate is True:
@@ -108,11 +112,11 @@ class NestModuleTemplateHandler:
         创建模块
         """
         # 将实体信息导入prisma
-        self.generate_prisma_model(self.module_info)
+        # self.generate_prisma_model(self.module_info)
         entity_name = self.module_info.get("name")
         attributions = self.module_info.get("attributes", [])
         info = {
-            "entity_lower_camel": NameRuleConverter.to_lower_camel_case(entity_name),
+            "entity_lower_camel": NameRuleConverter.upper_camel_case_to_lower_camel_case(entity_name),
             "entity_upper_camel": entity_name,
             "entity_lower_underline": NameRuleConverter.to_underline(entity_name),
             "entity_attribute": generate_nest_attributions(attributions, validate=False),
@@ -207,15 +211,15 @@ class NestProjectTemplateHandler:
         FileUtil.copy_all_files(BACKEND_TEMPLATE_DIR_PATH, self.project_dir)
 
         # 获取项目模块
-        module_list = self.project_info.get("modules")
+        # module_list = self.project_info.get("modules")
 
         # 逐一创建项目模块
-        for module in module_list:
-            module_handler = NestModuleTemplateHandler(module, self.project_dir)
-            module_handler.create_module()
+        # for module in module_list:
+        #     module_handler = NestModuleTemplateHandler(module, self.project_dir)
+        #     module_handler.create_module()
 
         self.generate_package_file()
-        self.add_modules_config_to_project(module_list)
+        # self.add_modules_config_to_project(module_list)
 
         # 文件删除，删除模板文件
         FileUtil.remove_file(self.project_dir / ".env")

@@ -15,6 +15,7 @@ def main():
     project_name = input("your project name：")
     project_desc = input("your project description：")
     # 判断路径是否存在
+    choice = "new"
     if (DEFAULT_WORKSPACE_ROOT / project_name).exists():
         choice = input("项目已存在，加载项目 or 新建？load / new: ")
         # 忽略大小写
@@ -32,7 +33,6 @@ def main():
 
     nest_project_template_handler = NestProjectTemplateHandler(current_project.serialize, current_project.project_home)
     nest_project_template_handler.create_project()
-
 
     # 1、根据项目需求文档和数据库设计文档来生成 创建模块所需要的内容：
     database_info = {
@@ -54,7 +54,8 @@ def main():
     entity_str_list = MarkdownUtil.parse_code_block(entity_res, "json")
     # 存储entity_list
     FileUtil.append_file(current_project.resources / 'entity' / "entity_list.json", json.dumps(entity_str_list))
-    # entity_list = json.loads(FileUtil.read_file(current_project.resources / 'entity' / "entity_list.json"))
+
+    # entity_str_list = json.loads(FileUtil.read_file(current_project.resources / 'entity' / "entity_list.json"))
     current_project.save()
     entity_list = []
     for entity in entity_str_list:

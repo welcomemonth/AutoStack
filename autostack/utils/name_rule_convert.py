@@ -23,13 +23,20 @@ class NameRuleConverter:
         return re.sub(r'(?<=[a-z])[A-Z]|(?<!^)[A-Z](?=[a-z])', r'_\g<0>', x).lower()
 
     @staticmethod
-    def to_upper_camel_case(x):
+    def underline_to_upper_camel_case(x):
         """转大驼峰法命名"""
         s = re.sub(r'_([a-zA-Z])', lambda m: m.group(1).upper(), x.lower())
         return s[0].upper() + s[1:]
 
     @staticmethod
-    def to_lower_camel_case(x):
+    def upper_camel_case_to_lower_camel_case(x):
+        """转小驼峰法命名"""
+        if not x:
+            return x
+        return x[0].lower() + x[1:]
+
+    @staticmethod
+    def underline_to_lower_camel_case(x):
         """转小驼峰法命名"""
         s = re.sub(r'_([a-zA-Z])', lambda m: m.group(1).upper(), x.lower())
         return s[0].lower() + s[1:]
@@ -37,7 +44,7 @@ class NameRuleConverter:
 
 # 示例用法
 if __name__ == "__main__":
-    example_str = "example_string"
+    example_str = "ScholarshipApplication"
     print(NameRuleConverter.to_underline(example_str))  # 输出: example_string
-    print(NameRuleConverter.to_upper_camel_case(example_str))  # 输出: ExampleString
-    print(NameRuleConverter.to_lower_camel_case(example_str))  # 输出: exampleString
+    print(NameRuleConverter.underline_to_upper_camel_case(example_str))  # 输出: ExampleString
+    print(NameRuleConverter.upper_camel_case_to_lower_camel_case(example_str))  # 输出: exampleString
