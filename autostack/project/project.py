@@ -5,7 +5,7 @@ from autostack.utils import MarkdownUtil, FileTreeUtil, FileUtil, PromptUtil
 from autostack.common.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.common.logs import logger
-from autostack.template_handler import NestProjectTemplateHandler, NestModuleTemplateHandler
+from autostack.template_handler import create_project, create_module
 from .module import Module
 
 
@@ -49,13 +49,7 @@ class Project(BaseModel):
 
     def add_module(self, module: Module):
         """添加模块到项目"""
-        # project_info = {
-        #     "project_name": self.project_name,
-        #     "project_description": self.project_description,
-        #     "author": self.author,
-        #     "modules": []
-        # }
-        # module_list = [module.serialize]
+        create_module(self.project_home, module.serialize)
         module.created = True
         self.modules.append(module)
 
@@ -136,6 +130,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.database_design_path, database_design[0])
 
     # 3、项目初始化
+    create_project(project.project_home, project.serialize)
     return project
 
 

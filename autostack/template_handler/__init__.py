@@ -5,4 +5,4 @@
 @Author  : Rex
 @File    : __init__.py.py
 """
-from .nest_template_handler import NestModuleTemplateHandler, NestProjectTemplateHandler
+from .nest_template_handler import create_project, create_module

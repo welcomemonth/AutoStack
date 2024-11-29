@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
-import { RoleLevel } from '../model/user.entity';
+import { RoleLevel } from '@prisma/client';
 
 
 export class UpdateUserDto{

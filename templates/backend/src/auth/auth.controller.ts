@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { SignInDto } from './dto/signin.dto';
 import { Role } from './decorators/role.decorator';
-import { RoleLevel } from 'src/user/model/user.entity';
+import { RoleLevel } from '@prisma/client';
 import { AuthGuard } from './auth.guard';
 
 @Controller("auth")

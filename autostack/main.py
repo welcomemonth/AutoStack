@@ -2,7 +2,7 @@ import json
 
 from autostack.llm import LLM
 from autostack.project import init_project, load_project, Module
-from autostack.template_handler import NestProjectTemplateHandler, NestModuleTemplateHandler
+from autostack.template_handler import create_project, create_module
 from autostack.utils import MarkdownUtil, FileUtil, PromptUtil
 from autostack.project import init_project, load_project
 from autostack.common.const import DEFAULT_WORKSPACE_ROOT
@@ -31,9 +31,6 @@ def main():
     # 如果current_project不为空，则直接使用，否则初始化一个新项目
     current_project = current_project if current_project else init_project(project_name, project_desc)
 
-    nest_project_template_handler = NestProjectTemplateHandler(current_project.serialize, current_project.project_home)
-    nest_project_template_handler.create_project()
-
     # 1、根据项目需求文档和数据库设计文档来生成 创建模块所需要的内容：
     database_info = {
         "requirement_doc": current_project.requirement_doc,
@@ -57,7 +54,6 @@ def main():
 
     # entity_str_list = json.loads(FileUtil.read_file(current_project.resources / 'entity' / "entity_list.json"))
     current_project.save()
-    entity_list = []
     for entity in entity_str_list:
         # json 格式化
         entity = json.loads(entity)
@@ -65,11 +61,7 @@ def main():
                         description=entity["description"],
                         attributes=entity["attributes"])
         current_project.add_module(module)
-        module_handler = NestModuleTemplateHandler(entity, current_project.project_home)
-        module_handler.create_module()
-        entity_list.append(entity)
 
-    nest_project_template_handler.add_modules_config_to_project(entity_list)
     # print(entity_list)
     # project信息存储, 方便下次读取
     current_project.save()
