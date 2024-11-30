@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional, Union, Any
 from pathlib import Path
 from pydantic import BaseModel
@@ -6,7 +7,7 @@ from autostack.common.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.common.logs import logger
 from autostack.template_handler import create_project, create_module
-from .module import Module
+from .module import Module, Entity
 
 
 # @singleton
@@ -42,6 +43,12 @@ class Project(BaseModel):
     def database_design_doc(self):
         """读取数据库设计文档并返回内容"""
         return FileUtil.read_file(self.database_design_path)
+
+    @property
+    def entities(self):
+        """返回数据库设计文档中的实体列表"""
+        entity_str_list = FileUtil.read_file(self.resources / 'entity' / "entity_list.json")
+        return json.loads(entity_str_list)
 
     @property
     def prisma_schema(self):
@@ -87,8 +94,13 @@ class Project(BaseModel):
             file_path = self.root
         return FileTreeUtil.tree(file_path)
 
+    def __del__(self):
+        """对象销毁时自动保存"""
+        logger.info("Saving project data before exiting...")
+        self.save()
 
-def init_project(project_name: str, project_desc: str, requirement_path: Path = None, modules: List[Module] = []):
+
+def init_project(project_name: str, project_desc: str, requirement_path: Path = None, modules: List[Module] = None):
     """
         项目初始化工作：
             1、在默认的工作目录下创建项目文件夹
@@ -101,18 +113,18 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
                       requirement_path=requirement_path,
                       modules=modules)
     llm = LLM()
-    project.modules = []
+    project.modules = modules if modules else []
 
     # 0、存储用户的输入数据
     user_data_content = f'{{"project_name": "{project_name}", "project_desc": "{project_desc}"}}'
     FileUtil.write_file(project.resources / "user_data" / "user_data.json", user_data_content)
 
     # 1、需求生成和存储
-    gen_prd_info = {
+
+    gen_prd_prompt = PromptUtil.prompt_handle("gen_prd.prompt", {
         "project_name": project_name,
         "project_desc": project_desc
-    }
-    gen_prd_prompt = PromptUtil.prompt_handle("gen_prd.prompt", gen_prd_info)
+    })
     res_prd = llm.completion(gen_prd_prompt)
     real_prd = MarkdownUtil.parse_code_block(res_prd, "markdown")
 
@@ -120,17 +132,47 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.requirement_path, real_prd[0])
 
     # 2、数据库设计文档生成
-    database_design_info = {
+    database_design_prompt = PromptUtil.prompt_handle("database_design.prompt", {
         "prd_content": real_prd[0]
-    }
-    database_prompt = PromptUtil.prompt_handle("database_design.prompt", database_design_info)
-    database_design_doc = llm.completion(database_prompt)
+    })
+    database_design_doc = llm.completion(database_design_prompt)
     database_design = MarkdownUtil.parse_code_block(database_design_doc, "markdown")
     project.database_design_path = project.docs / "database_design" / "database_design.md"
     FileUtil.write_file(project.database_design_path, database_design[0])
 
     # 3、项目初始化
     create_project(project.project_home, project.serialize)
+
+    # 4、数据库信息生成，prisma schema生成
+    database_prompt = PromptUtil.prompt_handle("database.prompt", {
+        "requirement_doc": project.requirement_doc,
+        "database_design_doc": project.database_design_doc,
+        "prisma_schema": project.prisma_schema
+    })
+    database_res = llm.completion(database_prompt)
+    prisma_database = MarkdownUtil.parse_code_block(database_res, "prisma")
+    FileUtil.append_file(project.project_home / "prisma" / "schema.prisma", prisma_database[0])
+
+    # 5、依据prisma实体生成entity的json格式
+    gen_entity_prompt = PromptUtil.prompt_handle("gen_entity.prompt", {
+        "schema_prisma": prisma_database[0],
+        "schema_json": Entity.get_schema(),
+    })
+    entity_res = llm.completion(gen_entity_prompt)
+    entity_str_list = MarkdownUtil.parse_code_block(entity_res, "json")
+    FileUtil.append_file(project.resources / 'entity' / "entity_list.json", json.dumps(entity_str_list, ensure_ascii=False, indent=4))
+
+    # 6、将模块添加到项目
+    for entity in project.entities:
+        # json 格式化
+        entity = json.loads(entity)
+        module = Module(name=entity["name"],
+                        entity=Entity(name=entity["name"],
+                                      attributes=entity["attributes"],
+                                      description=entity["description"],
+                                      ))
+        project.add_module(module)
+
     return project
 
 

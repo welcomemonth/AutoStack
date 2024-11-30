@@ -29,15 +29,26 @@ MODULE_TEMPLATE_PATHS = {
 }
 # 定义 Prisma 类型到 TypeScript 类型的映射关系
 PRISMA_TO_TS = {
-    "String": "string",  # 字符串类型
-    "Int": "number",  # 整数类型
-    "Float": "number",  # 浮点数类型
-    "BigInt": "bigint",  # 大整数类型
-    "Boolean": "boolean",  # 布尔类型
-    "DateTime": "Date",  # 日期类型
-    "Json": "any",  # JSON 类型映射为任意类型
-    "Null": "null",  # 空值类型
+  "String": 'string',            # Prisma String -> TypeScript string
+  "Int": 'number',               # Prisma Int -> TypeScript number
+  "BigInt": 'number',            # Prisma BigInt -> TypeScript string (or BigInt, depending on usage)
+  "Decimal": 'number',           # Prisma Decimal -> TypeScript string (use decimal.js for precision)
+  "Float": 'number',             # Prisma Float -> TypeScript number
+  "Boolean": 'boolean',          # Prisma Boolean -> TypeScript boolean
+  "DateTime": 'Date | string',   # Prisma DateTime -> TypeScript Date or string
+  "Json": 'any',                 # Prisma Json -> TypeScript any (or more specific types based on usage)
+  "Enum": 'enum',                # Prisma Enum -> TypeScript enum
+  "Bytes": 'Buffer',             # Prisma Bytes -> TypeScript Buffer (for binary data)
+  # "Relation": 'Model',           # Prisma Relation -> TypeScript corresponding DTO or Model
+  "StringArray": 'string[]',     # Prisma String[] -> TypeScript string[]
+  "IntArray": 'number[]',        # Prisma Int[] -> TypeScript number[]
+  "FloatArray": 'number[]',      # Prisma Float[] -> TypeScript number[]
+  "DecimalArray": 'number[]',    # Prisma Decimal[] -> TypeScript string[] (use decimal.js for precision)
+  "BooleanArray": 'boolean[]',   # Prisma Boolean[] -> TypeScript boolean[]
+  "DateTimeArray": 'Date[]',     # Prisma DateTime[] -> TypeScript Date[]
+  "JsonArray": 'any[]',          # Prisma Json[] -> TypeScript any[]
 }
+
 PRISMA_FILE_TEMPLATE = "prisma/schema.prisma"
 
 
