@@ -5,3 +5,7 @@
 @Author  : Rex
 @File    : __init__.py.py
 """
+
+from .const import DEFAULT_WORKSPACE_ROOT, ROOT, PROMPT_ROOT
+from .logs import logger
+

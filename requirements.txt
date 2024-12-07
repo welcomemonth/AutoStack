@@ -1,6 +1,9 @@
 gitignore_parser==0.1.9
-litellm==1.52.16
+litellm~=1.52.10
 loguru==0.7.2
-pydantic==2.10.2
+pydantic~=2.9.0
 python-dotenv==1.0.1
 tiktoken==0.7.0
+
+openai~=1.54.4
+docker~=7.1.0

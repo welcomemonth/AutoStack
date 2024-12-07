@@ -151,7 +151,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     })
     database_res = llm.completion(database_prompt)
     prisma_database = MarkdownUtil.parse_code_block(database_res, "prisma")
-    FileUtil.append_file(project.project_home / "prisma" / "schema.prisma", prisma_database[0])
+    FileUtil.write_file(project.project_home / "prisma" / "schema.prisma", prisma_database[0])
 
     # 5、依据prisma实体生成entity的json格式
     gen_entity_prompt = PromptUtil.prompt_handle("gen_entity.prompt", {

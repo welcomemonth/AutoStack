@@ -10,15 +10,3 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// 定义角色枚举
-enum RoleLevel {
-    ADMIN
-    USER
-}
-
-model User {
-  id       String    @id @default(cuid())
-  username String     @unique
-  password String
-  role     RoleLevel? @default(USER) // 默认角色设置为 GUEST
-}

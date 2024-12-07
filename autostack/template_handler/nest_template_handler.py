@@ -124,7 +124,8 @@ def create_module(project_path, module_info):
     """
     # 将实体信息导入prisma
     entity_name = module_info.get("name")
-    attributions = module_info.get("attributes", [])
+    entity = module_info.get("entity", [])
+    attributions = entity.get("attributes", [])
     info = {
         "entity_lower_camel": NameRuleConverter.upper_camel_case_to_lower_camel_case(entity_name),
         "entity_upper_camel": entity_name,

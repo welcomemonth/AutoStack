@@ -1,13 +1,13 @@
+import json
+from autostack.docker_env import execute_command_in_container, start_container
 from autostack.llm import LLM
-from autostack.project import init_project, load_project, Module
-from autostack.template_handler import create_project, create_module
-from autostack.utils import MarkdownUtil, FileUtil, PromptUtil
 from autostack.project import init_project, load_project
-from autostack.common.const import DEFAULT_WORKSPACE_ROOT
+from autostack.common import DEFAULT_WORKSPACE_ROOT, logger
 from autostack.utils import MarkdownUtil, FileUtil, PromptUtil
 
 
 def main():
+    llm = LLM()
     current_project = None
     project_name = input("your project name：")
     project_desc = input("your project description：")
@@ -26,7 +26,44 @@ def main():
 
     # 如果current_project不为空，则直接使用，否则初始化一个新项目
     current_project = current_project if current_project else init_project(project_name, project_desc)
+    current_project.save()
+    # 项目已经创建完成，在容器中运行这个项目
+    container = start_container(current_project.project_home)
+    # container = start_container(r"E:\projectfactory\AutoStack\workspace\app")
+    # 1、npm install
+    execute_command_in_container(container, "service postgresql restart")
+    reslog = execute_command_in_container(container, "npm install")
+    isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
+        "command": "npm install",
+        "result": reslog
+    })
+    response = llm.completion(isSuccess_prompt)
+    if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
+        logger.error(reslog)
+        return
+    # 2、根据 prisma schema 生成 prisma client
+    reslog = execute_command_in_container(container, "npx prisma migrate dev --name init")
+    isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
+        "command": "npx prisma migrate dev --name init",
+        "result": reslog
+    })
+    response = llm.completion(isSuccess_prompt)
+    if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
+        logger.error(reslog)
+        return
 
+    # 3、项目编译
+    reslog = execute_command_in_container(container, "npm run build")
+    isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
+        "command": "npm run build",
+        "result": reslog
+    })
+    response = llm.completion(isSuccess_prompt)
+    if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
+        logger.error(reslog)
+        return
+    execute_command_in_container(container, "npm run start:dev")
+    # logger.info(reslog)
     # 3、对于某个复杂业务接口，让AI根据项目中已有的模块中的服务文件来选择该业务需要哪些服务，携带者已有的服务文件，生成该业务接口的代码
 
     # 4、对于业务接口代码进行测试，解决该接口的运行成功出现的bug
