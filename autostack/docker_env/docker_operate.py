@@ -29,7 +29,7 @@ def start_container(project_path: Union[Path, str], image_name: str = 'nestjs:la
         # 启动容器，映射容器的 3000 端口到宿主机的随机端口
         container = client.containers.run(
             image_name,
-            command="service postgresql start && tail -f /dev/null",  # 启动容器后保持容器运行，不执行其他命令
+            command="tail -f /dev/null",  # 启动容器后保持容器运行，不执行其他命令
             volumes={project_path: {'bind': '/app', 'mode': 'rw'}},  # 将本地项目目录挂载到容器内
             working_dir='/app',  # 容器内的工作目录
             ports={'3000/tcp': port},  # None 表示随机端口
