@@ -3,7 +3,10 @@
 ### 要求：
 1、根据需求文档，撰写一份postgresql数据库设计文档。
 2、数据库设计文档的内容完整、结构清晰、逻辑严谨。
-3、对于每一个实体类其属性必须包括id(String @id @default(cuid()))、create_time(DateTime @default(now))、update_time(DateTime @default(now))字段
+3、对于每一个实体类其属性必须至少包括以下字段：
+    - id          String   @id  @default(cuid())
+    - create_time DateTime @default(now)
+    - update_time DateTime @default(now)
 4、涉及到实体中有关时间的字段，必须使用DateTime类型。
 
 ### 文档内容:

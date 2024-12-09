@@ -17,14 +17,14 @@ import time
 client = docker.from_env()
 
 
-def start_container(project_path: Union[Path, str], image_name: str = 'nestjs:latest'):
+def start_container(project_path: Union[Path, str], image_name: str = 'zhengyuzhang/nestjs:latest'):
     """
     根据镜像名称启动容器，挂载本地项目并映射端口
     @:param project_path: 本机项目路径
     @:param image_name: 镜像名称，默认nestjs/cli
     """
     try:
-        print(f"正在启动容器: {image_name}")
+        logger.info(f"正在启动容器: {image_name}")
         port = random.randint(20000, 50000)
         # 启动容器，映射容器的 3000 端口到宿主机的随机端口
         container = client.containers.run(
@@ -44,17 +44,15 @@ def start_container(project_path: Union[Path, str], image_name: str = 'nestjs:la
         return None
 
 
-def execute_command_in_container(container, command):
+def execute_command_in_container(container, command, detach=False, stream=True):
     """
     在容器中执行命令并返回执行日志
 
     """
+    logger.info(f"执行命令: {command}")
     try:
         # 在容器中执行命令
-        exec_log = container.exec_run(command, tty=True, stream=True)
-
-        # 读取并打印命令输出
-        print(f"执行命令: {command}")
+        exec_log = container.exec_run(command, tty=True, stream=stream, detach=detach)
         logs = ""
         for log in exec_log[1]:
             logger.info(log.decode("utf-8").strip())
@@ -65,25 +63,3 @@ def execute_command_in_container(container, command):
         print(f"执行命令失败: {e}")
         return None
 
-
-# 主函数示例
-# def main():
-#     # 设置 NestJS 项目路径和镜像名称
-#     project_path = r'E:\projectfactory\AutoStack\workspace\app'  # NestJS 项目的路径
-#     image_name = 'node:16'  # 使用的基础镜像
-#
-#     # 启动容器并返回容器对象
-#     container = start_container(image_name, project_path)
-#
-#     if container:
-#         # 在容器中执行命令：安装依赖、构建并启动 NestJS 项目
-#         execute_command_in_container(container, "npm install")
-#         execute_command_in_container(container, "npm run build")
-#         execute_command_in_container(container, "npm run start:prod")
-#
-#         # 容器将在后台继续运行，执行其他操作可根据需求添加
-#         print("容器将在后台继续运行...")
-
-
-# if __name__ == "__main__":
-#     main()
