@@ -1,4 +1,4 @@
-## 任务
+### 任务
 根据给你的schema.prisma文件内容，对于model实体的每个字段，生成一个对应的json schema。
 
 ### schema.prisma
