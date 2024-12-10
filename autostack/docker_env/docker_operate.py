@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Union
 from autostack.common import logger
 import docker
+import threading
 import random
 import time
 
@@ -63,3 +64,11 @@ def execute_command_in_container(container, command, detach=False, stream=True):
         print(f"执行命令失败: {e}")
         return None
 
+
+def execute_command_in_container_thread(container, command, detach=False, stream=True):
+    """
+    在容器中执行命令并返回执行日志
+    """
+    thread = threading.Thread(target=execute_command_in_container, args=(container, command, detach, stream))
+    thread.start()
+    return thread
