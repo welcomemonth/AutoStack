@@ -6,6 +6,6 @@
 @File    : __init__.py.py
 """
 
-from .const import DEFAULT_WORKSPACE_ROOT, ROOT, PROMPT_ROOT
+from .const import DEFAULT_WORKSPACE_ROOT, ROOT, PROMPT_ROOT, CONTAINER_WORKDIR
 from .logs import logger
 

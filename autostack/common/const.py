@@ -20,5 +20,5 @@ def get_package_root():
 ROOT = get_package_root()
 PROMPT_ROOT = ROOT / "autostack" / "prompt"
 DEFAULT_WORKSPACE_ROOT = ROOT / "workspace"
-
+CONTAINER_WORKDIR = "/app"
 
