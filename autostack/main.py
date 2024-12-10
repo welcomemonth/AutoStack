@@ -1,9 +1,8 @@
 import json
-from autostack.docker_env import execute_command_in_container, start_container
 from autostack.llm import LLM
 from autostack.project import init_project, load_project
 from autostack.common import DEFAULT_WORKSPACE_ROOT, logger
-from autostack.utils import MarkdownUtil, FileUtil, PromptUtil
+from autostack.utils import MarkdownUtil, FileUtil, PromptUtil, DockerUtil
 
 
 def main():
@@ -28,11 +27,11 @@ def main():
     current_project = current_project if current_project else init_project(project_name, project_desc)
     current_project.save()
     # 项目已经创建完成，在容器中运行这个项目
-    container = start_container(current_project.project_home)
+
+    container = DockerUtil(current_project.project_home)
     # container = start_container(r"E:\projectfactory\AutoStack\workspace\app")
     # 1、npm install
-    execute_command_in_container(container, "service postgresql restart")
-    res_log = execute_command_in_container(container, "npm install")
+    res_log = container.execute_command(container, "npm install")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npm install",
         "result": res_log
@@ -42,7 +41,7 @@ def main():
         logger.error(res_log)
         return
     # 2、prisma format，格式化 Prisma schema 文件（schema.prisma）的内容，使其符合标准的代码风格和格式规范
-    res_log = execute_command_in_container(container, "npx prisma format")
+    res_log = container.execute_command(container, "npx prisma format")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npx prisma format",
         "result": res_log
@@ -52,7 +51,7 @@ def main():
         logger.error(res_log)
         return
     # 2、根据 prisma schema 生成 prisma client
-    res_log = execute_command_in_container(container, "npx prisma migrate dev --name init")
+    res_log = container.execute_command(container, "npx prisma migrate dev --name init")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npx prisma migrate dev --name init",
         "result": res_log
@@ -63,7 +62,7 @@ def main():
         return
 
     # 3、项目编译
-    res_log = execute_command_in_container(container, "npm run build")
+    res_log = container.execute_command(container, "npm run build")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npm run build",
         "result": res_log
@@ -72,7 +71,7 @@ def main():
     if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
         logger.error(res_log)
         return
-    execute_command_in_container(container, "npm run start:dev")
+    container.execute_command(container, "npm run start:dev")
     # logger.info(reslog)
     # 3、对于某个复杂业务接口，让AI根据项目中已有的模块中的服务文件来选择该业务需要哪些服务，携带者已有的服务文件，生成该业务接口的代码
 
