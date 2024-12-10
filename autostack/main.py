@@ -32,35 +32,45 @@ def main():
     # container = start_container(r"E:\projectfactory\AutoStack\workspace\app")
     # 1、npm install
     execute_command_in_container(container, "service postgresql restart")
-    reslog = execute_command_in_container(container, "npm install")
+    res_log = execute_command_in_container(container, "npm install")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npm install",
-        "result": reslog
+        "result": res_log
     })
     response = llm.completion(isSuccess_prompt)
     if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
-        logger.error(reslog)
+        logger.error(res_log)
+        return
+    # 2、prisma format，格式化 Prisma schema 文件（schema.prisma）的内容，使其符合标准的代码风格和格式规范
+    res_log = execute_command_in_container(container, "npx prisma format")
+    isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
+        "command": "npx prisma format",
+        "result": res_log
+    })
+    response = llm.completion(isSuccess_prompt)
+    if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
+        logger.error(res_log)
         return
     # 2、根据 prisma schema 生成 prisma client
-    reslog = execute_command_in_container(container, "npx prisma migrate dev --name init")
+    res_log = execute_command_in_container(container, "npx prisma migrate dev --name init")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npx prisma migrate dev --name init",
-        "result": reslog
+        "result": res_log
     })
     response = llm.completion(isSuccess_prompt)
     if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
-        logger.error(reslog)
+        logger.error(res_log)
         return
 
     # 3、项目编译
-    reslog = execute_command_in_container(container, "npm run build")
+    res_log = execute_command_in_container(container, "npm run build")
     isSuccess_prompt = PromptUtil.prompt_handle("command_is_exec_success.prompt", {
         "command": "npm run build",
-        "result": reslog
+        "result": res_log
     })
     response = llm.completion(isSuccess_prompt)
     if json.loads(MarkdownUtil.parse_code_block(response, "json")[0])["result"] == "fail":
-        logger.error(reslog)
+        logger.error(res_log)
         return
     execute_command_in_container(container, "npm run start:dev")
     # logger.info(reslog)
