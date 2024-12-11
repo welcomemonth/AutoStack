@@ -12,7 +12,7 @@ client = docker.from_env()
 
 
 # 全局唯一的Docker_Util
-class DockerUtil:
+class DockerContainer:
     """
     在docker容器中执行的shell 工具类
     """
@@ -21,7 +21,7 @@ class DockerUtil:
 
     def __new__(cls, project_path: Union[Path, str]):
         if cls._instance is None:
-            cls._instance = super(DockerUtil, cls).__new__(cls)
+            cls._instance = super(DockerContainer, cls).__new__(cls)
             cls._instance.project_path = project_path
             cls._container = cls._start_container(project_path)
             if cls._container:
