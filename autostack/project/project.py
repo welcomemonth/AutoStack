@@ -6,7 +6,7 @@ from autostack.utils import MarkdownUtil, FileTreeUtil, FileUtil, PromptUtil
 from autostack.common.const import DEFAULT_WORKSPACE_ROOT
 from autostack.llm import LLM
 from autostack.common.logs import logger
-from autostack.template_handler import create_project, create_module
+from autostack.template_handler import NestTemplateHandler
 from .module import Module, Entity
 
 
@@ -56,7 +56,7 @@ class Project(BaseModel):
 
     def add_module(self, module: Module):
         """添加模块到项目"""
-        create_module(self.project_home, module.serialize)
+        NestTemplateHandler.create_module(self.project_home, module.serialize)
         module.created = True
         self.modules.append(module)
 
@@ -141,7 +141,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     FileUtil.write_file(project.database_design_path, database_design[0])
 
     # 3、项目初始化
-    create_project(project.project_home, project.serialize)
+    NestTemplateHandler.create_project(project.project_home, project.serialize)
 
     # 4、数据库信息生成，prisma schema生成
     database_prompt = PromptUtil.prompt_handle("database.prompt", {

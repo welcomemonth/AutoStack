@@ -29,7 +29,9 @@ COMPOSE_GOAL = """
 class Programmer(BaseAgent):
     def __init__(self, tools, project: Project, verbose=False, max_iter=10):
         # 调用父类的构造方法
-        llm = LLM(system_prompt=PromptUtil.prompt_handle("programmer_system_prompt.prompt"))
+        llm = LLM(
+            system_prompt=PromptUtil.prompt_handle("programmer_system_prompt.prompt")
+        )
         super().__init__(tools, llm, verbose, max_iter)
 
         self.project = project
