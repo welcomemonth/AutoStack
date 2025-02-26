@@ -7,8 +7,9 @@ import time
 import threading
 
 # 创建 Docker 客户端
+logger.info("创建 Docker 客户端...")
 client = docker.from_env()
-
+logger.info("Docker 客户端创建成功！")
 
 # 全局唯一的Docker_Util
 class DockerUtil:
@@ -40,8 +41,14 @@ class DockerUtil:
             logger.info(f"正在启动容器: {image_name}")
             port = random.randint(30000, 50000)
             # 启动容器，映射容器的 3000 端口到宿主机的随机端口
+            # 删除容器
+            origin_container = client.containers.get("autostack")
+            if origin_container:
+                origin_container.remove(force=True)
+
             container = client.containers.run(
                 image_name,
+                name="autostack",
                 command="tail -f /dev/null",  # 启动容器后保持容器运行，不执行其他命令
                 volumes={project_path: {'bind': CONTAINER_WORKDIR, 'mode': 'rw'}},  # 将本地项目目录挂载到容器内
                 working_dir=CONTAINER_WORKDIR,  # 容器内的工作目录

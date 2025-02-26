@@ -24,12 +24,16 @@ class LLM:
 
     def completion(self, messages: Union[str, Message, list[dict], list[Message], list[str]]):
         logger.info(f"LLM completion with messages: {messages}")
-        res = self.client.chat.completions.create(
+        resp = self.client.chat.completions.create(
             model=self.model, 
             messages=self.format_msg(messages)
         )
-        logger.info(f"LLM completion response: {res.choices[0].message.content}")
-        return res.choices[0].message.content
+        result = resp.choices[0].message.content
+        # 适配 deepseek
+        if "<think>" in result:
+            result = result.split("</think>")[1]
+            logger.info(f"LLM completion response: {result}")
+        return result
 
     def format_msg(self, messages: Union[str, Message, list[dict], list[Message], list[str]]) -> list[dict]:
         """convert messages to list[dict]."""

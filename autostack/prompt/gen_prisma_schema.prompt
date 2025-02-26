@@ -1,10 +1,5 @@
 ### 任务
-根据我的需求文档和postgresql数据库设计文档为我生成prisma实体类.
-
-### 需求文档：
-```
-${requirement_doc}
-```
+根据我的postgresql数据库设计文档为我生成prisma实体类.
 
 ### 数据库设计文档
 ```
@@ -18,7 +13,7 @@ ${prisma_schema}
 
 ### 要求：
 1. **生成 Prisma 实体类**：根据需求文档和数据库设计文档为我生成 Prisma 实体类。
-2、**涉及到实体中有关时间的字段**，必须使用DateTime类型。
+2、**涉及到实体中有关时间的字段**，必须使用DateTime类型，不能出现Date类型，否则你会受到严峻惩罚。
 3、**重要提示**：对于涉及到一对一，一对多，多对多实体关系时，注意`@relation`的使用。
     - 在生成 Prisma schema 时，请确保对于关联关系，@relation 属性中的 fields 和 references 只在关联的另一方模型中指定。特别是在双向关系（如 following 和 followers）中，@relation 应只在模型的反向关系字段中设置这些属性，而不在主字段中设置。
         - **错误使用**：`following    Follow[]   @relation("Following", fields: [id], references: [followerId])`
@@ -26,11 +21,11 @@ ${prisma_schema}
     - 对于一对多关系，数组`[]`后不能加问号。
         - **错误使用**：`posts Post[]?`
         - **正确使用**：`posts Post[]`
-4. **实体要求**：对于每一个实体类其属性必须包括
+4. **实体要求**：对于每一个实体类其属性必须包括，否则你会受到严峻惩罚
     - id           String @id @default(cuid())
     - create_time  DateTime @default(now())
     - update_time  DateTime @default(now())
-6. **保持可扩展性和清晰的命名**：生成的模型应该清晰且具备可扩展性，命名应符合领域语义。
-7. **输出格式要求**：仅输出 Prisma schema 文件内容，不要输出其他信息。
+6. **保持可扩展性和清晰的命名**：生成的模型应该清晰且具备可扩展性，命名应符合领域语义，否则你会受到严峻惩罚。
+7. **输出格式要求**：仅输出 Prisma schema 文件内容，不要输出其他信息，否则你会受到严峻惩罚。
 8. **模型与数据库一致性**：请确保生成的 Prisma 模型与数据库设计文档保持一致，能够正确映射数据库表和字段。
-9. **不要使用prisma原生不支持的方法**, 比如`@check`等
+9. **不要使用prisma原生不支持的方法**, 比如`@check`等，否则你会受到严峻惩罚

@@ -1,4 +1,5 @@
 import json
+import uuid
 from typing import List, Optional, Union, Any
 from pathlib import Path
 from pydantic import BaseModel
@@ -14,6 +15,7 @@ from .module import Module, Entity
 class Project(BaseModel):
     project_name: str
     project_description: str
+    project_name_by_snake: str
     author: Optional[str] = "autostack"
     requirement_path: Optional[Path] = None
     database_design_path: Optional[Path] = None
@@ -25,8 +27,8 @@ class Project(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.root = DEFAULT_WORKSPACE_ROOT / self.project_name
-        self.project_home = self.root / self.project_name
+        self.root = DEFAULT_WORKSPACE_ROOT / self.project_name_by_snake
+        self.project_home = self.root / self.project_name_by_snake
         self.resources = self.root / 'resources'  # 都是处理后的json格式
         self.docs = self.root / 'docs'  # 原生的markdown格式
 
@@ -76,7 +78,7 @@ class Project(BaseModel):
         return self.model_dump(exclude={"project_home", "resources", "docs", "requirement_path"})
 
     def save(self):
-        # 将项目序列化得数据保存到文件，每次都覆盖原文件
+        # 将项目序列化的数据保存到文件，每次都覆盖原文件
         with open(self.root / "project.json", "w", encoding='utf-8') as f:
             f.write(self.model_dump_json())
 
@@ -108,18 +110,33 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
             3、存储用户交互得数据，并使用prompt生成需求文档并存储到resources文件夹下
             4、然后通过project反向序列化得json，传递给项目初始化函数，进行项目初始化
     """
+    llm = LLM()
+    logger.info(f"项目信息：\n项目名称：{project_name}\n项目描述：{project_desc}")
+    # 生成项目名称(用蛇形命名法命名)
+    gen_project_name_by_snake = PromptUtil.prompt_handle("gen_project_name_by_snake.prompt", {
+        "project_name": project_name
+    })
+    project_name_by_snake = llm.completion(gen_project_name_by_snake)
+
+    # 0. 初始化项目
+    logger.info(f" ==================== 开始准备项目:{project_name_by_snake} ====================")
     project = Project(project_name=project_name,
+                      project_name_by_snake=project_name_by_snake,
                       project_description=project_desc,
                       requirement_path=requirement_path,
                       modules=modules)
-    llm = LLM()
+
     project.modules = modules if modules else []
 
-    # 0、存储用户的输入数据
+    # 存储用户的输入数据
     user_data_content = f'{{"project_name": "{project_name}", "project_desc": "{project_desc}"}}'
     FileUtil.write_file(project.resources / "user_data" / "user_data.json", user_data_content)
 
+    logger.info("==================== 项目准备完成！====================")
+
     # 1、需求生成和存储
+
+    logger.info("==================== 开始生成需求文档 ====================")
 
     gen_prd_prompt = PromptUtil.prompt_handle("gen_prd.prompt", {
         "project_name": project_name,
@@ -131,8 +148,12 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     project.requirement_path = project.docs / "prd" / "requirement.md"
     FileUtil.write_file(project.requirement_path, real_prd[0])
 
+    logger.info("==================== 需求文档生成完成！====================")
+
     # 2、数据库设计文档生成
-    database_design_prompt = PromptUtil.prompt_handle("database_design.prompt", {
+
+    logger.info("==================== 开始生成数据库设计文档 ====================")
+    database_design_prompt = PromptUtil.prompt_handle("gen_dbdd.prompt", {
         "prd_content": real_prd[0]
     })
     database_design_doc = llm.completion(database_design_prompt)
@@ -140,12 +161,20 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     project.database_design_path = project.docs / "database_design" / "database_design.md"
     FileUtil.write_file(project.database_design_path, database_design[0])
 
+    logger.info("==================== 数据库设计文档生成完成！====================")
     # 3、项目初始化
+
+    logger.info("==================== 开始初始化项目 ====================")
+
     NestTemplateHandler.create_project(project.project_home, project.serialize)
 
+    logger.info("==================== 项目初始化完成！====================")
+
     # 4、数据库信息生成，prisma schema生成
-    database_prompt = PromptUtil.prompt_handle("database.prompt", {
-        "requirement_doc": project.requirement_doc,
+
+    logger.info("==================== 开始生成prisma schema ====================")
+
+    database_prompt = PromptUtil.prompt_handle("gen_prisma_schema.prompt", {
         "database_design_doc": project.database_design_doc,
         "prisma_schema": project.prisma_schema
     })
@@ -153,19 +182,30 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     prisma_database = MarkdownUtil.parse_code_block(database_res, "prisma")
     FileUtil.write_file(project.project_home / "prisma" / "schema.prisma", prisma_database[0])
 
+    logger.info("==================== prisma schema生成完成！====================")
+
     # 5、依据prisma实体生成entity的json格式
-    gen_entity_prompt = PromptUtil.prompt_handle("gen_entity.prompt", {
+
+    logger.info("==================== 开始生成entity的json格式 ====================")
+
+    gen_entity_prompt = PromptUtil.prompt_handle("gen_entity_list.prompt", {
         "schema_prisma": prisma_database[0],
         "schema_json": Entity.get_schema(),
     })
     entity_res = llm.completion(gen_entity_prompt)
     entity_str_list = MarkdownUtil.parse_code_block(entity_res, "json")
-    FileUtil.append_file(project.resources / 'entity' / "entity_list.json", json.dumps(entity_str_list, ensure_ascii=False, indent=4))
+    entity_list = [json.loads(entity) for entity in entity_str_list]
+    FileUtil.append_file(
+        project.resources / 'entity' / "entity_list.json",
+        json.dumps(entity_list, ensure_ascii=False, indent=4))
+
+    logger.info("==================== entity的json格式生成完成！====================")
 
     # 6、将模块添加到项目
+
+    logger.info("==================== 开始添加模块到项目 ====================")
     for entity in project.entities:
         # json 格式化
-        entity = json.loads(entity)
         module = Module(name=entity["name"],
                         entity=Entity(name=entity["name"],
                                       attributes=entity["attributes"],
@@ -173,10 +213,12 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
                                       ))
         project.add_module(module)
 
+    logger.info("==================== 模块添加完成！====================")
+
     return project
 
 
-def load_project(project_name: str) -> Project:
+def load_project(project_name_by_snake: str) -> Project:
     """ 从json文件中加载已有的项目 """
-    project_path = DEFAULT_WORKSPACE_ROOT / project_name / "project.json"
+    project_path = DEFAULT_WORKSPACE_ROOT / project_name_by_snake / "project.json"
     return Project.load(project_path)
