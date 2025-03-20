@@ -13,7 +13,6 @@ from autostack.common.logs import logger
 import os
 
 BACKEND_TEMPLATE_DIR_PATH = ROOT / 'templates/backend/'
-WORKSPACE_ROOT_PATH = ROOT / 'workspace'
 PROJECT_TEMPLATE_PATHS = {
     'package': 'package.json.templ',
     "app.module": 'src/app.module.ts.templ'
@@ -154,6 +153,7 @@ class NestTemplateHandler:
     @staticmethod
     def create_project(project_path, project_info):
         project_name = project_info["project_name"]
+        project_name_by_snake = project_info["project_name_by_snake"]
         """
         创建项目
         """
@@ -167,7 +167,7 @@ class NestTemplateHandler:
 
         # 生成package.json
         package_info = {
-            "project_name": project_info.get("project_name"),
+            "project_name": project_name_by_snake,
             "project_description": project_info.get('project_description')
         }
         NestTemplateHandler.__generate_file_by_template(
@@ -175,21 +175,26 @@ class NestTemplateHandler:
             BACKEND_TEMPLATE_DIR_PATH / "package.json.templ",
             package_info
         )
-
+        # NestTemplateHandler.__generate_file_by_template(
+        #     project_path / "package-lock.json",
+        #     BACKEND_TEMPLATE_DIR_PATH / "package-lock.json.template",
+        #     package_info
+        # )
         # 文件删除，删除模板文件
         FileUtil.remove_file(project_path / ".env")
         FileUtil.remove_dir(project_path / "src/demo")
         FileUtil.remove_file(project_path / "package.json.templ")
+        # FileUtil.remove_file(project_path / "package-lock.json.template")
         FileUtil.remove_file(project_path / "src/app.module.ts.templ")
 
         # 生成.env文件
         default_env = {
             "POSTGRES_USER": "postgres",
             "POSTGRES_PASSWORD": "postgres",
-            "POSTGRES_DB": project_name,
+            "POSTGRES_DB": project_name_by_snake,
             "DB_HOST": "localhost",
             "DB_PORT": "5432",
-            "DB_SCHEMA": project_name,
+            "DB_SCHEMA": project_name_by_snake,
             "DATABASE_URL": "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${"
                             "POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer "
         }

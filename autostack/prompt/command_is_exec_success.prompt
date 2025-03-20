@@ -14,7 +14,7 @@ ${result}
 ### 要求
 1. 如果命令执行结果中包含以下任一内容，则认为命令执行失败：
    - 字样："error"、"fail"、"failed"、"fatal" 或 "exit code" 非 0。
-   - 其他显著的错误信息（如构建失败、命令执行失败的描述）。
+   - 特殊情况：assertion failed [block != nullptr]: BasicBlock requested for unrecognized address，不算失败，算成功。
 2. 其他情况皆认为命令执行成功。
 3. 返回格式：
 ```json

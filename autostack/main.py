@@ -1,8 +1,8 @@
 import json
 from autostack.llm import LLM
 from autostack.project import init_project, load_project
-from autostack.common import DEFAULT_WORKSPACE_ROOT, logger
-from autostack.utils import MarkdownUtil, FileUtil, PromptUtil
+from autostack.common import logger
+from autostack.utils import MarkdownUtil, PromptUtil
 from autostack.container import DockerContainer
 
 llm = LLM()
@@ -26,8 +26,7 @@ def initialize_project(project_name: str, project_desc: str):
     current_project = init_project(project_name, project_desc)
     current_project.save()
     container = DockerContainer(current_project.project_home)
-    run_command(container, "npm install")
-    run_command(container, "npx prisma format")
+
     return current_project, container
 
 
@@ -40,15 +39,29 @@ def load_existing_project(project_name_by_snake: str):
 
 def main():
     while True:
-        choice = input("项目是否已存在？\n1.新建\n2.加载\n请选择（1-2）：")
+        choice = input("需要新建项目还是从已有的项目中加载？\n1.新建\n2.加载\n请选择（1-2）：")
         if choice == "1":
             project_name = input("请输入项目名称（中文）：")
             project_desc = input("请输入对该项目的描述（越具体越好）：")
             current_project, container = initialize_project(project_name, project_desc)
+            run_command(container, "npm install --force")
+            run_command(container, "npx prisma format")
+            run_command(container, "npx prisma migrate dev --name init")
+            run_command(container, "npm run build")
+            run_command(container, "npm run start")
             break
         elif choice == "2":
             project_name_by_snake = input("请输入已存在的项目目录名：")
             current_project, container = load_existing_project(project_name_by_snake)
+            choice2 = input("是否需要重新安装依赖？\ny.yes\nn.no\n请选择（y or n）：")
+            if choice2.lower()[0] == "y":
+                run_command(container, "npm install --force")
+            choice2 = input("是否需要重新迁移数据库？\ny.yes\nn.no\n请选择（y or n）：")
+            if choice2.lower()[0] == "y":
+                run_command(container, "npx prisma format")
+                run_command(container, "npx prisma migrate dev --name init")
+            run_command(container, "npm run build")
+            run_command(container, "npm run start")
             break
         else:
             print("请选择（1-2）：")
@@ -69,10 +82,6 @@ def main():
     # else:
     #     project_desc = input("请输入对该项目的描述（越具体越好）：")
     #     current_project, container = initialize_project(project_name, project_desc)
-
-    run_command(container, "npx prisma migrate dev --name init")
-    run_command(container, "npm run build")
-    run_command(container, "npm run start")
 
 
 if __name__ == "__main__":

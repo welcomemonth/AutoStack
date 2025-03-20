@@ -185,6 +185,7 @@ cython_debug/
 
 
 # AutoStack
-workspace/
+workspace**/
 logs/*.txt
 !templates/backend/.env
+exper/

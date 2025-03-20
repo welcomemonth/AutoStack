@@ -156,6 +156,10 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     database_design_prompt = PromptUtil.prompt_handle("gen_dbdd.prompt", {
         "prd_content": real_prd[0]
     })
+    # 修改为根据用户描述生成数据库设计文档
+    # database_design_prompt = PromptUtil.prompt_handle("gen_dbdd_without_prd.prompt", {
+    #     "project_desc": project_desc
+    # })
     database_design_doc = llm.completion(database_design_prompt)
     database_design = MarkdownUtil.parse_code_block(database_design_doc, "markdown")
     project.database_design_path = project.docs / "database_design" / "database_design.md"
@@ -193,6 +197,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
         "schema_json": Entity.get_schema(),
     })
     entity_res = llm.completion(gen_entity_prompt)
+    logger.info("entity_res: \n" + entity_res)
     entity_str_list = MarkdownUtil.parse_code_block(entity_res, "json")
     entity_list = [json.loads(entity) for entity in entity_str_list]
     FileUtil.append_file(
@@ -204,7 +209,7 @@ def init_project(project_name: str, project_desc: str, requirement_path: Path = 
     # 6、将模块添加到项目
 
     logger.info("==================== 开始添加模块到项目 ====================")
-    for entity in project.entities:
+    for entity in entity_list:
         # json 格式化
         module = Module(name=entity["name"],
                         entity=Entity(name=entity["name"],
@@ -222,3 +227,4 @@ def load_project(project_name_by_snake: str) -> Project:
     """ 从json文件中加载已有的项目 """
     project_path = DEFAULT_WORKSPACE_ROOT / project_name_by_snake / "project.json"
     return Project.load(project_path)
+

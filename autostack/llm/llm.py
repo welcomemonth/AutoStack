@@ -23,16 +23,18 @@ class LLM:
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
 
     def completion(self, messages: Union[str, Message, list[dict], list[Message], list[str]]):
-        logger.info(f"LLM completion with messages: {messages}")
+        logger.info(f"LLM completion with messages: \n{messages}")
         resp = self.client.chat.completions.create(
             model=self.model, 
-            messages=self.format_msg(messages)
+            messages=self.format_msg(messages),
+            timeout=600
         )
         result = resp.choices[0].message.content
-        # 适配 deepseek
-        if "<think>" in result:
-            result = result.split("</think>")[1]
-            logger.info(f"LLM completion response: {result}")
+        # # 适配 deepseek
+        # if "<think>" in result:
+        #     logger.info(f"LLM completion response: {result.split('</think>')[0].split('<think>')[1]}")
+        #     result = result.split("</think>")[1]
+        #     # logger.info(f"LLM completion response: {result}")
         return result
 
     def format_msg(self, messages: Union[str, Message, list[dict], list[Message], list[str]]) -> list[dict]:
